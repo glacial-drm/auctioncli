@@ -1,13 +1,5 @@
-import nltk
 from time import sleep
-import similarity
-
-def process(user_input):
-    tokens = nltk.word_tokenize(user_input)
-
-    # Compute similarity
-    # Return top response?
-    return tokens
+import coursework.src.search as search
 
 def main():
     name = ""
@@ -15,7 +7,7 @@ def main():
     while True:
         user_input = input("Text goes here: ")
         
-        processed_input = process(user_input)
+        processed_input = search.process(user_input)
         # print(f"Bot: You said {processed_input}")
         sleep(1)
 
@@ -53,7 +45,7 @@ def main():
                 print("I can meet all the criteria for the checkpoint :)")
 
             case _: # Case for questions
-                answers = similarity.similarity_csv(path='../COMP3074-CW1-Dataset.csv',query=user_input)
+                answers = search.similarity_csv(path='../COMP3074-CW1-Dataset.csv',query=user_input)
                 
                 if(answers):
                     for ans in answers:
