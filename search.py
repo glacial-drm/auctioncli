@@ -55,14 +55,17 @@ def testermweight(diction): # Using countvectorizer
     all_text = diction.values()
     count_vect = CountVectorizer ( stop_words = stopwords . words("english"))
     X_train_counts = count_vect . fit_transform(all_text)
-    # print(X_train_counts[21])
+    print(X_train_counts[21]) # this is a term count
     
     # sparsely populated matrix, rather not use ----------------------
     # however, seemingly only way to apply weighting needs this?
+        # term weighting works as shown as example
+    # if we want to do similarity, we need to iteratively do the union with documents
+        # are columns in the same order as original docs?
     
     tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(    X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
-    print(X_train_tf.getcol(0))
+    print(X_train_tf.getcol(0)) # this is a weighted term count
 
 def build_td_matrix(dictionary: dict): # -----------------------------
     from collections import defaultdict
@@ -87,6 +90,8 @@ def build_td_matrix(dictionary: dict): # -----------------------------
         # without using countvectorizer???
         # or get inverted index in form of count vectorizer?
             # TF-IDF formula implies weighting terms within the document
+            # how do we access a given document to do similarity, it can't be this way...?
+
 
 def process_text(document): # Method Description
     tokens = nltk.word_tokenize(document)
