@@ -41,11 +41,12 @@ def search_qa(query, td_matrix): #----------------------------
 
     # Apply term weighting to the query
 
-    # 5.3.1, compute the intersection of all the words in our 
+    # cosine similarity with search query (for each doc in the collection)
+        # map query onto td_matrix, then cosine similarity with each other column (document)
     #for 
     similarity = 1 - spatial.distance.cosine()
 
-    # return list of order docs
+    # return list of order docs (decreasing similarity ranking)
 
 def testermweight(diction): # Using countvectorizer
     from nltk.corpus import stopwords
@@ -55,17 +56,18 @@ def testermweight(diction): # Using countvectorizer
     all_text = diction.values()
     count_vect = CountVectorizer ( stop_words = stopwords . words("english"))
     X_train_counts = count_vect . fit_transform(all_text)
-    print(X_train_counts[21]) # this is a term count
+    print(X_train_counts.getrow(54))
+    # print(X_train_counts[54]) # this is a term count
     
     # sparsely populated matrix, rather not use ----------------------
     # however, seemingly only way to apply weighting needs this?
         # term weighting works as shown as example
-    # if we want to do similarity, we need to iteratively do the union with documents
-        # are columns in the same order as original docs?
+    # are columns in the same order as original docs?
+        # seems obfuscated, which makes optimisation more difficult
     
     tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(    X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
-    print(X_train_tf.getcol(0)) # this is a weighted term count
+    print(X_train_tf.getrow(54)) # this is a document??? ----------------------
 
 def build_td_matrix(dictionary: dict): # -----------------------------
     from collections import defaultdict
@@ -79,18 +81,19 @@ def build_td_matrix(dictionary: dict): # -----------------------------
         for token in tokens:
             inverted_index[token][doc_id] += 1
 
-    print(processed_dictionary["doc0"])
+    print(processed_dictionary["doc54"])
 
     # The resulting index is a dict of dicts. To view it as a
     # standard dict for printing :
     final_index = {term: dict(postings) for term, postings in inverted_index.items()}
-    # print(final_index['economic'])
+    print(final_index['committees'])
 
     # Apply term weighting somehow ------------------------------------
         # without using countvectorizer???
         # or get inverted index in form of count vectorizer?
             # TF-IDF formula implies weighting terms within the document
-            # how do we access a given document to do similarity, it can't be this way...?
+            # we access documents column by column in td matrix
+                # how?
 
 
 def process_text(document): # Method Description
