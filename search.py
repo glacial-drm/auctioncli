@@ -7,6 +7,8 @@
 
 import csv
 import nltk
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
 
 def output_answer(sorted_similarity, ans_dict):
     pass
@@ -30,25 +32,39 @@ def output_answer(sorted_similarity, ans_dict):
 
 def search_qa(query, td_matrix): #----------------------------
     from scipy import spatial
-    from sklearn.feature_extraction.text import TfidfTransformer
     
+
+
     # Map search query on the document collection-induced vector space
-        # make it a document term (fixe)
+        # make it a document term matrix (fixed size vector)
     processed_query = process_text(query)
 
     # Apply term weighting to the query
-    tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(    X_train_counts)
-    X_train_tf = tf_transformer.transform(X_train_counts)
-    print(X_train_tf.shape )
 
     # 5.3.1, compute the intersection of all the words in our 
-    for 
+    #for 
     similarity = 1 - spatial.distance.cosine()
 
     # return list of order docs
 
-def build_td_matrix(dictionary: dict): # -----------------------------
+def testermweight(diction): # Using countvectorizer
     from nltk.corpus import stopwords
+    from sklearn.feature_extraction.text import TfidfTransformer
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    all_text = diction.values()
+    count_vect = CountVectorizer ( stop_words = stopwords . words("english"))
+    X_train_counts = count_vect . fit_transform(all_text)
+    # print(X_train_counts[21])
+    
+    # sparsely populated matrix, rather not use ----------------------
+    # however, seemingly only way to apply weighting needs this?
+    
+    tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(    X_train_counts)
+    X_train_tf = tf_transformer.transform(X_train_counts)
+    print(X_train_tf.getcol(0))
+
+def build_td_matrix(dictionary: dict): # -----------------------------
     from collections import defaultdict
     
     processed_dictionary = {}
@@ -56,9 +72,11 @@ def build_td_matrix(dictionary: dict): # -----------------------------
         processed_dictionary[line] = process_text(dictionary[line])
     
     inverted_index = defaultdict(lambda:defaultdict(int))
-    for doc_id , tokens in processed_dictionary.items () :
-        for token in tokens :
+    for doc_id, tokens in processed_dictionary.items():
+        for token in tokens:
             inverted_index[token][doc_id] += 1
+
+    print(processed_dictionary["doc0"])
 
     # The resulting index is a dict of dicts. To view it as a
     # standard dict for printing :
@@ -66,6 +84,9 @@ def build_td_matrix(dictionary: dict): # -----------------------------
     # print(final_index['economic'])
 
     # Apply term weighting somehow ------------------------------------
+        # without using countvectorizer???
+        # or get inverted index in form of count vectorizer?
+            # TF-IDF formula implies weighting terms within the document
 
 def process_text(document): # Method Description
     tokens = nltk.word_tokenize(document)
@@ -95,4 +116,5 @@ def csv_to_dict(path):
     return questions, answers
 
 questions, answers = csv_to_dict(path='../COMP3074-CW1-Dataset.csv')
+testermweight(questions)
 build_td_matrix(dictionary=questions)
