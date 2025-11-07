@@ -54,23 +54,32 @@ def testermweight(diction): # Using countvectorizer
     from sklearn.feature_extraction.text import CountVectorizer
 
     all_text = diction.values()
-    count_vect = CountVectorizer ( stop_words = stopwords . words("english"))
-    X_train_counts = count_vect . fit_transform(all_text)
-    print(X_train_counts.getrow(54))
+
+    # add query to corpus beforehand
+
+    count_vect = CountVectorizer(stop_words=stopwords.words("english"))
+    X_train_counts = count_vect.fit_transform(all_text)
+    # print(X_train_counts.getrow(54))
     # print(X_train_counts[54]) # this is a term count
-    
-    # sparsely populated matrix, rather not use ----------------------
-    # however, seemingly only way to apply weighting needs this?
-        # term weighting works as shown as example
-    # are columns in the same order as original docs?
-        # seems obfuscated, which makes optimisation more difficult
-    
-    tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(    X_train_counts)
+
+    tf_transformer = TfidfTransformer(use_idf=True, sublinear_tf=True).fit(X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
+    
+    # Fit vectorizer to original data
+    # Fit vectorizer to query
+    # Transform result on fitted transforms 
+
+    # For each column (document-term matrix)
+        # get values somehow
+        # compute cosine similarity
+
+
+    print(X_train_tf.shape)
     print(X_train_tf.getrow(54)) # this is a document??? ----------------------
 
 def build_td_matrix(dictionary: dict): # -----------------------------
     from collections import defaultdict
+    import numpy as np
     
     processed_dictionary = {}
     for line in dictionary:
@@ -81,11 +90,13 @@ def build_td_matrix(dictionary: dict): # -----------------------------
         for token in tokens:
             inverted_index[token][doc_id] += 1
 
-    print(processed_dictionary["doc54"])
+    
 
     # The resulting index is a dict of dicts. To view it as a
     # standard dict for printing :
     final_index = {term: dict(postings) for term, postings in inverted_index.items()}
+
+    print(processed_dictionary["doc54"])
     print(final_index['committees'])
 
     # Apply term weighting somehow ------------------------------------
@@ -94,6 +105,17 @@ def build_td_matrix(dictionary: dict): # -----------------------------
             # TF-IDF formula implies weighting terms within the document
             # we access documents column by column in td matrix
                 # how?
+    
+    # TF-IDF = log(1+ freq of term in doc)*log(total docs/docs containing word)
+    # for docs in inverted_index.items():
+    #     for term in docs:
+    #         print(term.items())
+    #     doc = np.log10(1 + doc) * np.log10( inverted_index.len() / docs.len())
+
+    # final_index2 = {term: dict(postings) for term, postings in inverted_index.items()}
+    # print(final_index2['committees'])
+        
+
 
 
 def process_text(document): # Method Description
@@ -124,5 +146,5 @@ def csv_to_dict(path):
     return questions, answers
 
 questions, answers = csv_to_dict(path='../COMP3074-CW1-Dataset.csv')
-testermweight(questions)
+# testermweight(questions)
 build_td_matrix(dictionary=questions)
