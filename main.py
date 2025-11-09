@@ -1,9 +1,9 @@
 from time import sleep
-import Corpus as Corpus
+import Search
 
 def main():
     name = ""
-    c = Corpus.csv_qa(path='../COMP3074-CW1-Dataset.csv')
+    c = Search.CSV_QA(path='../COMP3074-CW1-Dataset.csv')
 
     while True:
         user_input = input("Text goes here: ")
