@@ -7,8 +7,10 @@
 
 import csv
 import nltk
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
+from collections import defaultdict
+import numpy as np
+from scipy import spatial
+
 class QA:
 
     def __init__(self):
@@ -17,12 +19,9 @@ class QA:
         self.__processed_dictionary = {}
         self.__term_total = 0
         self.__doc_total = 0
-
-    def init_corpus():
-        pass
     
     def cosine_similarities(self, query_inverted_index: dict): # cosine similarity on query with whole document, returns array
-        from scipy import spatial
+        
 
         # Cosine Similarity # NEED TO ACCOUNT FOR ORDERING
             
@@ -54,7 +53,6 @@ class QA:
         return cosine_similarities
 
     def TF_IDF_weighting(self, inverted_index: dict, is_corpus: bool):
-        import numpy as np
         
         if(is_corpus):
             inverted_index = self.__inverted_index
@@ -74,8 +72,6 @@ class QA:
             return inverted_index
         
     def to_inverted_index(self, dictionary: dict, sparse:bool, is_corpus:bool):
-        from collections import defaultdict
-        import numpy as np
         
         processed_dictionary = {}
         for doc in dictionary: # for document (key) in dictionary
@@ -136,7 +132,6 @@ class QA:
                 terms.append(term)
                 
     def compute_term_counts(self): # Compute word counts of a term-document matrix, return term-count dictionary
-        from collections import defaultdict
         
         counts = defaultdict(int)
 
@@ -165,7 +160,6 @@ class CSV_QA(QA):
         self.compute_corpus_shape(dictionary=self.questions)
         self.to_inverted_index(dictionary=self.questions, sparse=True, is_corpus=True)
     
-
     def search_qa(self, query:str): #-----------------------------------------------------------------------
         
         query_dict = {
@@ -219,11 +213,6 @@ class CSV_QA(QA):
                             answers["doc"+str(i)] = v
         
         return questions, answers
-
-class csv_intent(QA):
-    def __init__(self):
-        super().__init__()
-        self.intents = []
 
 c = CSV_QA(path='../COMP3074-CW1-Dataset.csv')
 c.search_qa("what are stocks and bonds")
