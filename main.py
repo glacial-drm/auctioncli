@@ -1,14 +1,12 @@
 from time import sleep
-import coursework.src.search as search
+import Corpus as Corpus
 
 def main():
     name = ""
+    c = Corpus.csv_qa(path='../COMP3074-CW1-Dataset.csv')
 
     while True:
         user_input = input("Text goes here: ")
-        
-        processed_input = search.process(user_input)
-        # print(f"Bot: You said {processed_input}")
         sleep(1)
 
         match user_input.lower():
@@ -19,6 +17,8 @@ def main():
             case 'help': # Print helpful information -----------
                 print("Help is on the way! (adding help command closer to completion)")
             
+
+            # USE LAB 2 TO CLASSIFY TEXT IN TERMS OF INTENT --------------------
             case 'hi' | 'hello': # Case for greetings(?)
                 if(name):
                     print(f"Hello {name}")
@@ -26,7 +26,6 @@ def main():
                     name = input("Hello, what is your name? ")
                     print(f"Nice to meet you {name}")
 
-            
             case 'what is my name' | 'what is my name?':
                 if(name):
                     print(f"Your name is {name}")
@@ -45,7 +44,7 @@ def main():
                 print("I can meet all the criteria for the checkpoint :)")
 
             case _: # Case for questions
-                answers = search.similarity_csv(path='../COMP3074-CW1-Dataset.csv',query=user_input)
+                answers = c.search_qa(query=user_input)
                 
                 if(answers):
                     for ans in answers:
