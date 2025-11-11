@@ -215,7 +215,9 @@ class CSV_QA(QA):
         return questions, answers
 
 c = CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-d = QA()
-from joblib import dump
+
+
+# from joblib import dump
 # FIND OUT HOW TO PICKLE SUBCLASSES
-dump(d, "../objects/search.joblib")
+    # constructor calls method only defined in superclass ---------------------
+# dump(c, "../objects/search.joblib")

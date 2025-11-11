@@ -1,19 +1,19 @@
 from time import sleep
 import Search
+import Intent
 from joblib import load
-# from Intent import classify_text
 
 def main():
     name = ""
     c = Search.CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-    # clf = load("../objects/log_reg_clf.joblib")
-    # print(classify_text(clf, "help"))
+    d = Intent.Intent_Classifier()
+    d.build_log_reg_clf()
     
     while True:
         user_input = input("Text goes here: ")
         sleep(1)
 
-        match user_input.lower():
+        match d.classify_text(user_input):
             case 'exit':
                 print("Goodbye!")
                 break
@@ -23,20 +23,20 @@ def main():
             
 
             # USE LAB 2 TO CLASSIFY TEXT IN TERMS OF INTENT --------------------
-            case 'hi' | 'hello': # Case for greetings(?)
+            case 'greeting':
                 if(name):
                     print(f"Hello {name}")
                 else:
                     name = input("Hello, what is your name? ")
                     print(f"Nice to meet you {name}")
 
-            case 'what is my name' | 'what is my name?':
+            case 'name-calling':
                 if(name):
                     print(f"Your name is {name}")
                 else:
                     print("You haven't told me your name yet...")
             
-            case 'how are you' | 'how are you?':
+            case 'question-greeting':
                 ip = input("I am fine, how are you? ")
                 match ip: # Possibly do some sentiment analysis ------------
                     case '':
@@ -44,10 +44,10 @@ def main():
                     case _:
                         print("That's nice, or maybe it isn't...")
 
-            case 'what can you do' | 'what can you do?':
+            case 'discoverability':
                 print("I can meet all the criteria for the checkpoint :)")
 
-            case _: # Case for questions
+            case 'question-answering': # Case for questions
                 answers = c.search_qa(query=user_input)
                 
                 if(answers):
@@ -55,6 +55,9 @@ def main():
                         print(ans)                    
                 else: # Case for if we can't understand input (LAST CASE)
                     print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
+
+            case _: # Default case no longer necessary, output is from set of labels
+                print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
 
 if __name__ == "__main__":
     main()
