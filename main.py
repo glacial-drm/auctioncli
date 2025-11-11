@@ -1,10 +1,14 @@
 from time import sleep
 import Search
+from joblib import load
+# from Intent import classify_text
 
 def main():
     name = ""
     c = Search.CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-
+    # clf = load("../objects/log_reg_clf.joblib")
+    # print(classify_text(clf, "help"))
+    
     while True:
         user_input = input("Text goes here: ")
         sleep(1)

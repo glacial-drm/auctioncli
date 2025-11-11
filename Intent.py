@@ -66,11 +66,14 @@ print(accuracy_score(y_test , predicted))
 # print(f1_score(y_test , predicted , pos_label ='positive'))
 # Export Model
 
-new_data = [""]
-processed_newdata = count_vect.transform(new_data)
-processed_newdata = tfidf_transformer.transform(processed_newdata)
-print(clf.predict(processed_newdata))
+new_data = "nuh uh"
+def classify_text(classifier:LogisticRegression, text:str):
+    processed_newdata = count_vect.transform([text])
+    processed_newdata = tfidf_transformer.transform(processed_newdata)
+    
+    return(classifier.predict(processed_newdata))
 
-import pickle
-with open("./pickle/classifier.pickle","wb") as log_reg_classifier:
-    pickle.dump(clf, log_reg_classifier)
+print(classify_text(clf, new_data))
+
+from joblib import dump
+dump(clf, "../objects/log_reg_clf.joblib")

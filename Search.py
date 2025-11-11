@@ -215,4 +215,7 @@ class CSV_QA(QA):
         return questions, answers
 
 c = CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-c.search_qa("what are stocks and bonds")
+d = QA()
+from joblib import dump
+# FIND OUT HOW TO PICKLE SUBCLASSES
+dump(d, "../objects/search.joblib")
