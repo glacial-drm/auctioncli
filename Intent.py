@@ -12,23 +12,41 @@ from sklearn . metrics import accuracy_score , f1_score , confusion_matrix
 
 # import all data first
 label_dir = {
-"positive": "../../data/positive",
-"negative": "../../data/negative"
+    "greeting": "./intent-classification/greeting.txt",
+    # "small-talk": "",
+    "discoverability": "./intent-classification/discoverability.txt",
+    "name-calling": "./intent-classification/name-calling.txt",
+    "question-greeting": "./intent-classification/question-greeting.txt",
+    "question-answering": "./intent-classification/question-answering.txt",
+    # "transaction": ""
+        # split into sub transactions, using keyword
+        # regex keyword to effectively create a given keyword
+    
+    "help": "./intent-classification/help.txt",
+    "exit": "./intent-classification/exit.txt",
+    
+    "yes": "./intent-classification/yes.txt",
+    "no": "./intent-classification/no.txt"
+    # maybe???
+    # thank you???
+    # still there???
+    # repeat???
+    # name asking???
+    # time telling
 }
-
 data = []
 labels = []
 
-for label in label_dir.keys () :
-    for file in os.listdir(label_dir [ label]) :
-        filepath = label_dir [ label]+ os.sep + file
-        with open(filepath, encoding ='utf8 ', errors ='ignore ', mode ='r') as review:
-            content = review.read()
-            data.append(content)
+for label, filepath in label_dir.items() :
+    
+    with open(filepath, encoding ='utf8 ', errors ='ignore ', mode ='r') as review:
+        for line in review:
+            data.append(line.strip())
             labels.append(label)
 
 X_train, X_test, y_train, y_test = train_test_split(data, labels, stratify = labels, test_size =0.25, random_state =42)
 
+print(y_train)
 count_vect = CountVectorizer(stop_words = stopwords.words ('english'))
 X_train_counts = count_vect.fit_transform(X_train)
 
@@ -45,8 +63,14 @@ predicted = clf . predict ( X_new_tfidf )
 
 print ( confusion_matrix ( y_test , predicted ))
 print ( accuracy_score ( y_test , predicted ))
-print ( f1_score ( y_test , predicted , pos_label ='positive') )
+# print ( f1_score ( y_test , predicted , pos_label ='positive') )
 # Export Model
+
+new_data = [""]
+processed_newdata = count_vect . transform ( new_data )
+processed_newdata = tfidf_transformer . transform ( processed_newdata )
+print ( clf . predict ( processed_newdata ))
+
 import pickle
 with open("./pickle/classifier.pickle","wb") as log_reg_classifier:
     pickle.dump(clf, log_reg_classifier)
