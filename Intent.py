@@ -17,8 +17,8 @@ class Intent_Classifier:
             "greeting": "./intent-classification/greeting.txt",
             # "small-talk": "",
             # "discoverability": "./intent-classification/discoverability.txt", # BAD
-            # "name-calling": "./intent-classification/name-calling.txt",
-            # "question-greeting": "./intent-classification/question-greeting.txt",
+            "name-calling": "./intent-classification/name-calling.txt", # identity management
+            "question-greeting": "./intent-classification/question-greeting.txt", # BAD
             # "transaction": ""
                 # split into sub transactions, using keyword
                 # regex keyword to effectively create a given keyword
@@ -27,7 +27,7 @@ class Intent_Classifier:
             "exit": "./intent-classification/exit.txt",
             
             "yes": "./intent-classification/yes.txt",
-            "no": "./intent-classification/no.txt"
+            "no": "./intent-classification/no.txt",
             # maybe???
             # thank you???
             # still there???
@@ -35,7 +35,7 @@ class Intent_Classifier:
             # name asking???
             # time telling
             
-            # "question-answering": "./intent-classification/question-answering.txt", # Issues here apparently --------------------------
+            "question-answering": "./intent-classification/question-answering.txt" # Issues here apparently --------------------------
                 # Question answering should be catch all (default case), then if no response, reply with not understood
                 # Impossible as we always predict something
 

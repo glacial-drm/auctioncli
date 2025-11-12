@@ -1,10 +1,10 @@
 "How are you?",
 "Hi how are you?",
-"Hello how are you?",
+"how are you?",
 "Hola how are you?",
 "How are you doing?",
 "Hope you are doing well?",
-"Hello hope you are doing well?"
+"hope you are doing well?"
 "How's it going"
 "How ya doing?
 "How ya doin'"
