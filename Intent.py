@@ -4,8 +4,16 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score , f1_score , confusion_matrix
+from sklearn.metrics import accuracy_score,f1_score,confusion_matrix
 
+import numpy as np
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.model_selection import cross_val_score,StratifiedKFold
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 # NEXT STEPS -------------------------------------------
     # GATHER DATA
     # IMPLEMENT CROSS VALIDATION/BOOTSTRAPPING
@@ -64,18 +72,38 @@ class Intent_Classifier:
         self.__tfidf_transformer.fit(X_train_counts)
         X_train_tf = self.__tfidf_transformer.transform(X_train_counts)
 
-        self.__log_reg_clf.fit(X_train_tf , y_train)
+        self.__log_reg_clf.fit(X_train_tf,y_train)
 
         X_new_counts = self.__count_vect.transform(X_test)
         X_new_tfidf = self.__tfidf_transformer.transform(X_new_counts)
 
         predicted = self.__log_reg_clf.predict(X_new_tfidf)
 
-        print(confusion_matrix(y_test , predicted))
-        print(accuracy_score(y_test , predicted))
-        # print(f1_score(y_test , predicted , pos_label ='positive'))
+        print(confusion_matrix(y_test,predicted))
+        print(accuracy_score(y_test,predicted))
+        # print(f1_score(y_test,predicted,pos_label ='positive'))
         # Export Model
 
+    def build_k_fold(self):
+        kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+        # Define classifiers to evaluate
+        classifiers = {
+        " Multinomial Naive Bayes ": MultinomialNB () ,
+        " Support Vector Machine ": SVC () ,
+        " Random Forest ": RandomForestClassifier ()
+        }
+
+        # Define the ( stratified ) k- fold cross - validation (k =10)
+        kfold = StratifiedKFold ( n_splits =10,shuffle = True,random_state =42)
+
+        # Iterate over classifiers
+        for name,classifier in classifiers.items () :
+            pipeline = make_pipeline ( TfidfVectorizer ( stop_words ='english'),classifier )
+            scores = cross_val_score ( pipeline,self.__data,self.__labels,cv = kfold,scoring ='accuracy')
+            print (f"{ name }:")
+            print (" Cross - validation scores :", scores )
+            print (" Average accuracy :", np.mean ( scores ))
+            print ()        
 
     def classify_text(self, text:str):
         processed_newdata = self.__count_vect.transform([text])
@@ -88,5 +116,7 @@ class Intent_Classifier:
         dump(self.__log_reg_clf, "../objects/log_reg_clf.joblib")
 
 d = Intent_Classifier()
-d.build_log_reg_clf()
-print(d.classify_text("nuh uh"))
+# d.build_log_reg_clf()
+#  print(d.classify_text("nuh uh"))
+
+d.build_k_fold()
