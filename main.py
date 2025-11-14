@@ -13,7 +13,7 @@ def main():
         user_input = input("Text goes here: ")
         sleep(1)
 
-        match d.classify_text(user_input):
+        match user_input:# d.classify_text(user_input):
             case 'exit':
                 print("Goodbye!")
                 break
@@ -23,20 +23,20 @@ def main():
             
 
             # USE LAB 2 TO CLASSIFY TEXT IN TERMS OF INTENT --------------------
-            case 'greeting':
+            case 'greeting' | 'hello' | 'hi':
                 if(name):
                     print(f"Hello {name}")
                 else:
                     name = input("Hello, what is your name? ")
                     print(f"Nice to meet you {name}")
 
-            case 'name-calling':
+            case 'name-calling' | 'what is my name' | 'what is my name?':
                 if(name):
                     print(f"Your name is {name}")
                 else:
                     print("You haven't told me your name yet...")
             
-            case 'question-greeting':
+            case 'question-greeting' | 'how are you' | 'how are you?':
                 ip = input("I am fine, how are you? ")
                 match ip: # Possibly do some sentiment analysis ------------
                     case '':
@@ -44,12 +44,12 @@ def main():
                     case _:
                         print("That's nice, or maybe it isn't...")
 
-            case 'discoverability':
+            case 'discoverability' | 'what can you do?' | 'what can you do':
                 print("I can meet all the criteria for the checkpoint :)")
 
             # somehow check if words are in corpus beforehand, otherwise zero-divis
 
-            case 'question-answering': # Case for questions
+            case 'question-answering' | 'what are stocks and bonds' | 'what are stocks and bonds?': # Case for questions
                 answers = c.search_qa(query=user_input)
                 
                 if(answers):
