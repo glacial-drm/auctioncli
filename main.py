@@ -47,6 +47,8 @@ def main():
             case 'discoverability':
                 print("I can meet all the criteria for the checkpoint :)")
 
+            # somehow check if words are in corpus beforehand, otherwise zero-divis
+
             case 'question-answering': # Case for questions
                 answers = c.search_qa(query=user_input)
                 

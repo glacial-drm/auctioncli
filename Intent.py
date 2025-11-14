@@ -23,10 +23,9 @@ class Intent_Classifier:
         # import all data first
         self.__label_dir = {
             "greeting": "./intent-classification/greeting.txt",
-            # "small-talk": "",
-            # "discoverability": "./intent-classification/discoverability.txt", # BAD
             "name-calling": "./intent-classification/name-calling.txt", # identity management
             "question-greeting": "./intent-classification/question-greeting.txt", # BAD
+            "discoverability": "./intent-classification/discoverability.txt", # BAD
             # "transaction": ""
                 # split into sub transactions, using keyword
                 # regex keyword to effectively create a given keyword
@@ -36,6 +35,7 @@ class Intent_Classifier:
             
             "yes": "./intent-classification/yes.txt",
             "no": "./intent-classification/no.txt",
+            # "small-talk": "./intent-classification/small-talk.txt", # Other questions besides how are you
             # maybe???
             # thank you???
             # still there???
@@ -85,17 +85,14 @@ class Intent_Classifier:
         # Export Model
 
     def build_k_fold(self):
-        kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+        kfold = StratifiedKFold(n_splits=20, shuffle=True, random_state=42)
         # Define classifiers to evaluate
         classifiers = {
         " Multinomial Naive Bayes ": MultinomialNB () ,
         " Support Vector Machine ": SVC () ,
         " Random Forest ": RandomForestClassifier ()
         }
-
-        # Define the ( stratified ) k- fold cross - validation (k =10)
-        kfold = StratifiedKFold ( n_splits =10,shuffle = True,random_state =42)
-
+        
         # Iterate over classifiers
         for name,classifier in classifiers.items () :
             pipeline = make_pipeline ( TfidfVectorizer ( stop_words ='english'),classifier )
@@ -116,7 +113,7 @@ class Intent_Classifier:
         dump(self.__log_reg_clf, "../objects/log_reg_clf.joblib")
 
 d = Intent_Classifier()
-# d.build_log_reg_clf()
+d.build_log_reg_clf()
 #  print(d.classify_text("nuh uh"))
 
 d.build_k_fold()
