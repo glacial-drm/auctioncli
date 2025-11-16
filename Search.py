@@ -150,7 +150,7 @@ class QA:
         return tokens
 
 class CSV_QA(QA):
-    
+    # TALK ABOUT DEGRADATION BUG IN REPORT (there was no need to tfidf weight the corpus and compute term counts each search_qa call) -----------------------------------------
     def __init__(self, path):
         super().__init__()
         
