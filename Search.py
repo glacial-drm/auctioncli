@@ -159,6 +159,8 @@ class CSV_QA(QA):
         
         self.compute_corpus_shape(dictionary=self.questions)
         self.to_inverted_index(dictionary=self.questions, sparse=True, is_corpus=True)
+        self.compute_term_counts() # Compute term and dictionary counts for TF_IDF weighting
+        self.TF_IDF_weighting(inverted_index={}, is_corpus=True) # Weight the corpus
     
     def search_qa(self, query:str): #-----------------------------------------------------------------------
         
@@ -167,10 +169,6 @@ class CSV_QA(QA):
         }
         
         query_index = self.to_inverted_index(dictionary=query_dict, sparse=True, is_corpus=False) # Map query onto vector space
-        
-        self.compute_term_counts() # Compute term and dictionary counts for TF_IDF weighting
-       
-        self.TF_IDF_weighting(inverted_index={}, is_corpus=True) # Weight the corpus
         
         weighted_query_index = self.TF_IDF_weighting(inverted_index=query_index, is_corpus=False) # Weight the query
         
