@@ -75,7 +75,7 @@ class QA:
         
         processed_dictionary = {}
         for doc in dictionary: # for document (key) in dictionary
-            processed_dictionary[doc] = self.process_text(dictionary[doc])
+            processed_dictionary[doc] = self.process_text(dictionary[doc]) # preprocessing
         
         if(is_corpus): # if not corpus then method call is for query
             self.__processed_dictionary = processed_dictionary
@@ -168,7 +168,7 @@ class CSV_QA(QA):
             'query': query
         }
         
-        query_index = self.to_inverted_index(dictionary=query_dict, sparse=True, is_corpus=False) # Map query onto vector space
+        query_index = self.to_inverted_index(dictionary=query_dict, sparse=True, is_corpus=False) # Map query onto vector space, making a sparse term-document matrix
         
         weighted_query_index = self.TF_IDF_weighting(inverted_index=query_index, is_corpus=False) # Weight the query
         
