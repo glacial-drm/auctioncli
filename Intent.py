@@ -116,4 +116,4 @@ d = Intent_Classifier()
 d.build_log_reg_clf()
 #  print(d.classify_text("nuh uh"))
 
-d.build_k_fold()
+d# .build_k_fold()

@@ -30,6 +30,10 @@ def main():
                     name = input("Hello, what is your name? ")
                     print(f"Nice to meet you {name}")
 
+            case 'that is not my name' | 'my name is not daniel' | 'my name is damian' | 'my name ':
+                name = input("what is your name: ")
+                print(f"nice to meet you {name}")
+
             case 'name-calling' | 'what is my name' | 'what is my name?':
                 if(name):
                     print(f"Your name is {name}")
@@ -49,17 +53,17 @@ def main():
 
             # somehow check if words are in corpus beforehand, otherwise zero-divis
 
-            case 'question-answering' | 'what are stocks and bonds' | 'what are stocks and bonds?': # Case for questions
+            case _: #'question-answering' | 'what are stocks and bonds' | 'what are stocks and bonds?': # Case for questions
                 answers = c.search_qa(query=user_input)
                 
                 if(answers):
                     for ans in answers:
                         print(ans)                    
                 else: # Case for if we can't understand input (LAST CASE)
-                    print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
+                    print("I'm sorry, I didn't understand that q. Please use the 'help' command for assistance.")
 
-            case _: # Default case no longer necessary, output is from set of labels
-                print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
+            # case _: # Default case no longer necessary, output is from set of labels
+            #     print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
 
 if __name__ == "__main__":
     main()
