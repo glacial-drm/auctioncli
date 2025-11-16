@@ -30,7 +30,7 @@ def main():
                     name = input("Hello, what is your name? ")
                     print(f"Nice to meet you {name}")
 
-            case 'that is not my name' | 'my name is not daniel' | 'my name is damian' | 'my name ':
+            case 'that is not my name' | 'my name is not daniel' | 'my name is damian' | 'my name ': # incorporate case into above somehow, maybe prompt
                 name = input("what is your name: ")
                 print(f"nice to meet you {name}")
 
