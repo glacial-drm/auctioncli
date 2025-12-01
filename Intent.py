@@ -112,8 +112,8 @@ class Intent_Classifier:
         from joblib import dump
         dump(self.__log_reg_clf, "../objects/log_reg_clf.joblib")
 
-d = Intent_Classifier()
-d.build_log_reg_clf()
+# d = Intent_Classifier()
+# d.build_log_reg_clf()
 #  print(d.classify_text("nuh uh"))
 
-d# .build_k_fold()
+# d.build_k_fold()

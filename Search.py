@@ -10,8 +10,10 @@ import nltk
 from collections import defaultdict
 import numpy as np
 from scipy import spatial
+from os import walk
 
-class QA:
+
+class Similarity:
 
     def __init__(self):
         self.__inverted_index = {}
@@ -20,6 +22,25 @@ class QA:
         self.__term_total = 0
         self.__doc_total = 0
     
+    def search_cosines(self, query:str, sort_desc:bool): # returns cosine similarities of a query against the calling Similarity object's corpus
+        
+        query_dict = {
+            'query': query
+        }
+
+        query_index = self.to_inverted_index(dictionary=query_dict, sparse=True, is_corpus=False) # Map query onto vector space, making a sparse term-document matrix
+        
+        weighted_query_index = self.TF_IDF_weighting(inverted_index=query_index, is_corpus=False) # Weight the query
+        
+        query_cosines = self.cosine_similarities(weighted_query_index) # Compute similarities between corpus docs and query
+        
+        if(sort_desc):
+            sorted_similarites = dict(sorted(query_cosines.items(), key=lambda item:item[1], reverse=True)) # REFERENCE ME: ----------------------------------------------------------------
+
+            return sorted_similarites
+        
+        return query_cosines    
+
     def cosine_similarities(self, query_inverted_index: dict): # cosine similarity on query with whole document, returns array
         
 
@@ -62,7 +83,11 @@ class QA:
 
                 if(doc[1] != 0.0): # If term exists in doc
                     TF = np.log10(1 + doc[1]) # log(1+ freq of term in doc)
-                    IDF = np.log10(self.__doc_total / self.__term_counts[term[0]]) # log(total docs/docs containing word) | len(term[1].items())
+                    
+                    if(self.__term_counts[term[0]] == 0):
+                        IDF = np.log10(self.__doc_total / 1) # log(total docs/docs containing word) | len(term[1].items())
+                    else:
+                        IDF = np.log10(self.__doc_total / self.__term_counts[term[0]]) # log(total docs/docs containing word) | len(term[1].items())
                     
                     # Tuples are immutable, reassign instead
                     inverted_index[term[0]][doc[0]] = TF * IDF # Stop hallucinating, TF-IDF can be greater than 1
@@ -149,7 +174,74 @@ class QA:
         # Drop question marks???
         return tokens
 
-class CSV_QA(QA):
+class Transaction():
+    pass
+    # difference is checking for [intent] as a keyword in text? 
+
+class TXT_Intent():
+    def __init__(self, folder_path):
+        super().__init__()
+        
+        self.intents = [] # list of intents
+        self.intent_corpora = {} # dict that maps intent to dict of corresponding docs (corpus)
+        self.intent_similarities = {} # dict that maps intent to Similarity objects
+
+        self.folder_to_dicts_intent(folder_path=folder_path)
+        
+        obj: Similarity
+        for intent, obj in self.intent_similarities.items():
+
+            obj.compute_corpus_shape(dictionary=self.intent_corpora[intent])
+            obj.to_inverted_index(dictionary=self.intent_corpora[intent], sparse=True, is_corpus=True)
+            obj.compute_term_counts() # Compute term and dictionary counts for TF_IDF weighting
+            obj.TF_IDF_weighting(inverted_index={}, is_corpus=True) # Weight the corpus
+
+            # print(obj.__processed_dictionary)
+        
+
+    def search_intent(self, query:str):
+        intent_scores = {}
+
+
+        obj: Similarity
+        for intent, obj in self.intent_similarities.items(): 
+
+            # Potential threshold checking to avoid always computing against all dicts
+                # if greater than threshold then return intent
+            # as well as opposite if nothing is found
+                # return no-intent/None/[]
+                    # implication is that this leads to question-answering
+                        # then question answering will return nothing found if not relevant
+            
+            sorted_similarities = obj.search_cosines(query=query, sort_desc=True)
+            x = next(iter(sorted_similarities))
+            
+            intent_scores[intent] = sorted_similarities[x]
+            print(intent, sorted_similarities[x])
+        
+        best_intent = next(iter(dict(sorted(intent_scores.items(), key=lambda item:item[1], reverse=True))))
+        
+        # return intent and value (value for three tiered)
+        return (best_intent, intent_scores[best_intent])
+
+    def folder_to_dicts_intent(self, folder_path):
+        filenames = next(walk(folder_path), (None, None, []))[2]  # [] if no file | https://tinyurl.com/45cwzxw8
+        
+        for file in filenames:
+            intent = file.split('.')[0]
+            
+            self.intents.append(intent)
+            self.intent_corpora[intent] = {}
+            self.intent_similarities[intent] = Similarity()
+
+            with open(folder_path+"/"+file, encoding ='utf8 ', errors ='ignore ', mode ='r') as text_data:
+                for i, line in enumerate(text_data):
+                    self.intent_corpora[intent]['doc'+str(i)] = line.strip()
+            
+            # print(self.intent_corpora[intent])
+
+
+class CSV_QA(Similarity):
     # TALK ABOUT DEGRADATION BUG IN REPORT (there was no need to tfidf weight the corpus and compute term counts each search_qa call) -----------------------------------------
     def __init__(self, path):
         super().__init__()
@@ -163,26 +255,13 @@ class CSV_QA(QA):
         self.TF_IDF_weighting(inverted_index={}, is_corpus=True) # Weight the corpus
     
     def search_qa(self, query:str): #-----------------------------------------------------------------------
+        sorted_similarities = self.search_cosines(query=query, sort_desc=True)
         
-        query_dict = {
-            'query': query
-        }
-        
-        query_index = self.to_inverted_index(dictionary=query_dict, sparse=True, is_corpus=False) # Map query onto vector space, making a sparse term-document matrix
-        
-        weighted_query_index = self.TF_IDF_weighting(inverted_index=query_index, is_corpus=False) # Weight the query
-        
-        similarities = self.cosine_similarities(weighted_query_index) # Compute similarities between corpus docs and query
-        
-        return self.return_answers(similarities) # Return similarities
-    
-    def return_answers(self, cosine_similarities:dict): # ----------------------------------------------------------------
+        # Return similarities
         threshold = 0.97
         query_answers = []
         
-        sorted_similarites = dict(sorted(cosine_similarities.items(), key=lambda item:item[1], reverse=True))
-        
-        for doc, sim in sorted_similarites.items():
+        for doc, sim in sorted_similarities.items():
             
             if(threshold > sim):
                 break
@@ -212,10 +291,5 @@ class CSV_QA(QA):
         
         return questions, answers
 
-c = CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-
-
-# from joblib import dump
-# FIND OUT HOW TO PICKLE SUBCLASSES
-    # constructor calls method only defined in superclass ---------------------
-# dump(c, "../objects/search.joblib")
+# d = TXT_Intent(folder_path='./resources/intent-classification')
+# print(d.search_intent("what's is my name"))

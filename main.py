@@ -1,19 +1,20 @@
 from time import sleep
 import Search
-import Intent
-from joblib import load
+# import Intent
 
 def main():
     name = ""
-    c = Search.CSV_QA(path='../COMP3074-CW1-Dataset.csv')
-    d = Intent.Intent_Classifier()
-    d.build_log_reg_clf()
+    c = Search.CSV_QA(path='./resources/COMP3074-CW1-Dataset.csv')
+    d = Search.TXT_Intent(folder_path='./resources/intent-classification')
+    # d = Intent.Intent_Classifier()
+    # d.build_log_reg_clf()
     
     while True:
         user_input = input("Text goes here: ")
+        intent, score = d.search_intent(user_input) # Implement three tiered confidence system
         sleep(1)
-
-        match user_input:# d.classify_text(user_input):
+        
+        match intent:# d.classify_text(user_input):
             case 'exit':
                 print("Goodbye!")
                 break
@@ -23,7 +24,7 @@ def main():
             
 
             # USE LAB 2 TO CLASSIFY TEXT IN TERMS OF INTENT --------------------
-            case 'greeting' | 'hello' | 'hi':
+            case 'greeting':
                 if(name):
                     print(f"Hello {name}")
                 else:
@@ -34,13 +35,13 @@ def main():
                 name = input("what is your name: ")
                 print(f"nice to meet you {name}")
 
-            case 'name-calling' | 'what is my name' | 'what is my name?':
+            case 'name-calling':
                 if(name):
-                    print(f"Your name is {name}")
+                    print(f"Hello {name}") # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name
                 else:
                     print("You haven't told me your name yet...")
             
-            case 'question-greeting' | 'how are you' | 'how are you?':
+            case 'question-greeting':
                 ip = input("I am fine, how are you? ")
                 match ip: # Possibly do some sentiment analysis ------------
                     case '':
