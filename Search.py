@@ -199,7 +199,8 @@ class TXT_Intent():
             # print(obj.__processed_dictionary)
         
 
-    def search_intent(self, query:str):
+    def search_intent(self, query:str, intent_labels:list[str]):
+        # constrain based on passed labels -------------------------
         intent_scores = {}
 
 

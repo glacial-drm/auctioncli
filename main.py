@@ -1,71 +1,46 @@
 from time import sleep
 import Search
+import Intent
 import nltk
-# import Intent
 
 def main():
+    # we need a start to concretely load any external files
+    # if user exists then load
+    # else instantiate
     name = ""
+
     c = Search.CSV_QA(path='./resources/COMP3074-CW1-Dataset.csv')
     d = Search.TXT_Intent(folder_path='./resources/intent-classification')
-    # d = Intent.Intent_Classifier()
-    # d.build_log_reg_clf()
+    e = Intent.Intent(intent_searcher=d, qa_searcher=c)
+    transaction_keywords = ['auction', 'buy', 'sell', 'bounty', 'purchase'] # make a file for, further refine by then checking word in prompt
     
     while True:
         user_input = input("Text goes here: ")
-        intent, score = d.search_intent(user_input) # Implement three tiered confidence system
         sleep(1)
-        
-        match intent:# d.classify_text(user_input):
+
+        if any(substring in user_input for substring in transaction_keywords): # make a file for, further refine by then checking word in prompt
+            print("address me")
+
+        # intent, score = d.search_intent(user_input) # we also need three tiered confidence
+            # 0.9 | 0.7 | less
+
+        match user_input: # intent: # d.classify_text(user_input):
             case 'exit':
-                print("Goodbye!")
-                break
-
-            case 'help': # Print helpful information -----------
-                print("Help is on the way! (adding help command closer to completion)")
-            
-
-            # USE LAB 2 TO CLASSIFY TEXT IN TERMS OF INTENT --------------------
+                e.intent_exit()
+            case 'help':
+                e.intent_help()
             case 'greeting':
-                if(name):
-                    print(f"Hello {name}")
-                else:
-                    name = input("Hello, what is your name? ")
-                    print(f"Nice to meet you {name}")
-
-            case 'that is not my name' | 'my name is not daniel' | 'my name is damian' | 'my name ': # incorporate case into above somehow, maybe prompt
-                name = input("what is your name: ")
-                print(f"nice to meet you {name}")
-
+                e.intent_greeting()
             case 'name-calling':
-                if(name):
-                    print(f"Hello {name}") # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name
-                else:
-                    print("You haven't told me your name yet...")
-            
+                e.intent_name_calling()
             case 'question-greeting':
-                ip = input("I am fine, how are you? ")
-                match ip: # Possibly do some sentiment analysis ------------
-                    case '':
-                        print("Not one for small talk I see")
-                    case _:
-                        print("That's nice, or maybe it isn't...")
-
-            case 'discoverability' | 'what can you do?' | 'what can you do':
-                print("I can meet all the criteria for the checkpoint :)")
-
-            # somehow check if words are in corpus beforehand, otherwise zero-divis
-
-            case _: #'question-answering' | 'what are stocks and bonds' | 'what are stocks and bonds?': # Case for questions
-                answers = c.search_qa(query=user_input)
-                
-                if(answers):
-                    for ans in answers:
-                        print(ans)                    
-                else: # Case for if we can't understand input (LAST CASE)
-                    print("I'm sorry, I didn't understand that q. Please use the 'help' command for assistance.")
-
-            # case _: # Default case no longer necessary, output is from set of labels
-            #     print("I'm sorry, I didn't understand that. Please use the 'help' command for assistance.")
+                e.intent_question_greeting()
+            case 'discoverability':
+                e.intent_discoverability()
+            case 'question-answering': # Case for questions
+                e.intent_qa(question=user_input)
+            # no default case as classifier doesn't return default
+                # implement three tiered function, using default?
 
 if __name__ == "__main__":
     main()
