@@ -12,6 +12,7 @@ class Identity:
 
         self.users = [x['name'] for x in self.json["users"]] # list of registered users from json
         self.current_user = ''
+        self.new_user = not self.check_user_exists(user)
 
         self.load_user(user)
         # self.user_statuses = ['criminal', 'neutral', 'law-abiding']

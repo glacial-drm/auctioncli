@@ -1,6 +1,7 @@
 import inspect, sys
 from time import sleep
 from Search import TXT_Intent, CSV_QA
+from Identity import Identity
 
 class Intent:
     # lessons learnt
@@ -21,22 +22,13 @@ class Intent:
                     # SMALL TALK SHOULD BE PART OF TRANSACTION, one loop --------------------------
 
             
-    def __init__(self, intent_matcher:TXT_Intent, qa_searcher:CSV_QA):
+    def __init__(self, intent_matcher:TXT_Intent, qa_searcher:CSV_QA, identity:Identity):
         self.intent_matcher = intent_matcher
         self.qa_searcher = qa_searcher
+        self.user = identity
 
+        # Intent Managing
         self.intent_list = ['start'] # base case never gets checked as current intent is appended before checking prev intent
-        
-        # load-file
-            # FILE SHOULD BE JSON -----------------------------------------------------------------
-        self.transaction_list = [('yes', 'buy')] # need an actual base case -----------------------
-        # this stuff should go in states
-            # list of acknowledgements based on attitude
-        self.nickname = 'champ'
-        self.greeting = "What's up"
-        self.intent_count = {
-
-        }
 
         self.partial_prompts = { # include a recoverable yes/no (N-best-lists for intents with multiple branches)
             'exit': 'Did you want to exit?',
@@ -50,7 +42,59 @@ class Intent:
             'yes': 'Was that a yes?',
             'no': 'Was that a yes?' # we ask for yes instead of no as the goal is to get their desired intent as input. if they didn't say yes they said no instead
         }
+
+        self.intent_frozen = {
+            'state': False,
+            'intent': '' 
+        }
+
+        # Identity
+            # user stats
+        self.nickname = 'champ'
+        self.greeting = "What's up"
+        self.intent_count = {
+
+        }
+
+        # Events
+        # load-file
+            # FILE SHOULD BE JSON -----------------------------------------------------------------
+        self.transaction_list = [('yes', 'buy')] # need an actual base case -----------------------
+        # this stuff should go in states
+            # list of acknowledgements based on attitude
+        
     
+    def freeze_intent(self, intent:str, yes_no:bool): # if we want to force a new intent we need to store the intent here
+        # why do we want to freeze intent
+            # defining methods in terms of each other may lead to recursive definitions which can very easily get out of control when adding scope to project
+            # hence refer to a method using the intent key for the method in the outer loop
+                # scalable and already part of the infrastructure
+        self.intent_frozen['state'] = True
+        self.intent_frozen['intent'] = intent
+
+        # Yes/No intent is not appended to intent list, hence we append the passed intent
+        if yes_no:  
+            self.intent_list.append(intent)
+        # we append freeze as the outer loop three_tier confidence call, which typically appends the determined intent, is skipped when the intent is frozen
+            # this is possible as we have already determined the intent
+        self.intent_list.append('freeze') 
+        
+
+    def unfreeze_intent(self):
+        self.intent_frozen['state'] = False
+        self.intent_frozen['intent'] = ''
+
+    def tutorial(self):
+        # match yes, no
+            # if not those: you seem to know your stuff
+        if self.user.new_user:
+            match self.three_tier_input("You seem new. Want me to show you the ropes?"):
+                case 'yes': # force special single time outcome for tutorial intent
+                    self.freeze_intent(intent='tutorial', yes_no=True)
+                    
+                case _:
+                    pass
+
     def get_sentiment(self):
         # get sentiment of user input (positive/negative)
             # adjust chatbot mood accordingly
@@ -84,13 +128,14 @@ class Intent:
                 # transaction flag
         
         if(intent == 'transaction'): # 
-            intent = input("Did you want to do business?")
+            intent = input("What business did you want to do today?")
 
         match intent:
             case 'buy': # need spellcheck for this + gap filling?, cosine sim?
                 # , print current listings in iterable display
                     # search AGAIN LMAO
                         # actually display all the matching listings in some interactive way
+                # buying json 
                 pass
             case 'sell': # listings
                 pass
@@ -100,9 +145,11 @@ class Intent:
                 pass
             case 'steal': # random chance, gl
                 pass
-            case 'secret': # nothing spicy, don't be weird
+            case 'change-listing': # user can access their listings to change price / remove them
                 pass
-            case _: # return intent and pause input for iteration 
+            case 'secret': # idk
+                pass
+            case _: # freeze intent in wildcard no?
                 pass
 
         # ask if they want to continue WE BALL, WE ARE ALWAYS IN THE AUCTION HOUSE NOW
@@ -116,7 +163,7 @@ class Intent:
                     pass
 
     def three_tier_input(self, prompt:str):
-        i, s = self.get_new_intent(str) # if score greater than 1, skip three tiered
+        i, s = self.get_new_intent(prompt) # if score greater than 1, skip three tiered
         intent = self.three_tiered_confidence(i, s, False)
         
         return intent
@@ -195,16 +242,19 @@ class Intent:
                     # literally no reason       
         
         prev_intent = self.intent_list[len(self.intent_list) - 2] # -2 as by this method the current intent is the last in array (the current intent calls the prev intent method)
-        
+        if prev_intent == 'freeze': # we don't want to return frozen as an intent
+            prev_intent = self.intent_list[len(self.intent_list) - 3] 
+
         # list of potential conflicts that lead to other functions
-        if(prev_intent == inspect.stack()[1].function.split('_')[1]):# this should be handled based on intent e.g. if a specific transaction is triggered multiple times. this is the nature of some actions, no?
-            print(inspect.stack()[1].function.split('_')[1])
+        curr_intent = inspect.stack()[1].function.split('_')[1]
+        if(prev_intent == curr_intent):# this should be handled based on intent e.g. if a specific transaction is triggered multiple times. this is the nature of some actions, no?
+            print(curr_intent)
             self.intent_settings()
 
         return prev_intent # return prev if no conflict
 
     def get_new_intent(self, prompt:str): # wrapper to make getting new intent more traceable
-        new_intent, new_score = input(prompt+"\nYou:"), 1 # testing purposes --------------
+        new_intent, new_score = input(prompt+"\nYou: "), 1 # testing purposes --------------
         # new_intent, new_score = self.intent_matcher.search_intent(input(prompt+"\nYou:"))
         
         return new_intent, new_score
@@ -246,9 +296,10 @@ class Intent:
         
         # perform function
         print("Help is on the way!")
-
         # prompt user (possibly)
         match self.get_prev_intent():
+            case 'tutorial':
+                print("Welcome to the Tutorial")
             case 'discoverability':
                 # 
                 pass
