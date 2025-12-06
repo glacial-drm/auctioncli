@@ -199,8 +199,13 @@ class TXT_Intent():
             # print(obj.__processed_dictionary)
         
 
-    def search_intent(self, query:str, intent_labels:list[str]):
+    def search_intent(self, query:str):
         # constrain based on passed labels -------------------------
+            # always include universal ones, simple
+            # , intent_labels:list[str]
+                # are there any cases where we can't just match to generic case ones we don't care about
+                    # especially if we're going for an undirected, fully connected graph
+                        # only real place with branches might be transaction, but then we'd just give an awkward response and maybe reprompt
         intent_scores = {}
 
 

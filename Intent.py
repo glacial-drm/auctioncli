@@ -1,9 +1,6 @@
 import inspect, sys
+from time import sleep
 from Search import TXT_Intent, CSV_QA
-
-class IntentManager: # intent implements default actions, with each subclass intent having their own based on states
-    def __init__(self):
-        pass
 
 class Intent:
     # lessons learnt
@@ -24,52 +21,165 @@ class Intent:
                     # SMALL TALK SHOULD BE PART OF TRANSACTION, one loop --------------------------
 
             
-    def __init__(self, intent_searcher:TXT_Intent, qa_searcher:CSV_QA):
-        self.search_intent = intent_searcher
-        self.search_qa = qa_searcher
-        self.intent_list = ['start1']
+    def __init__(self, intent_matcher:TXT_Intent, qa_searcher:CSV_QA):
+        self.intent_matcher = intent_matcher
+        self.qa_searcher = qa_searcher
+
+        self.intent_list = ['start'] # base case never gets checked as current intent is appended before checking prev intent
         
-        # this stuff should go in states
-        self.nick = 'champ'
         # load-file
+            # FILE SHOULD BE JSON -----------------------------------------------------------------
+        self.transaction_list = [('yes', 'buy')] # need an actual base case -----------------------
+        # this stuff should go in states
+            # list of acknowledgements based on attitude
+        self.nickname = 'champ'
+        self.greeting = "What's up"
         self.intent_count = {
 
         }
-    
-    def start(self):
 
-        pass
+        self.partial_prompts = { # include a recoverable yes/no (N-best-lists for intents with multiple branches)
+            'exit': 'Did you want to exit?',
+            'help': 'Everything ok? Do you need some help?',
+            'greeting': '',
+            'name-calling': 'Did you want me to fetch your listed name?',
+            'question-greeting': 'Were you asking me?',
+            'discoverability': 'Did you want to know more?',
+            'question-answering': '', # n best lists on questions
+
+            'yes': 'Was that a yes?',
+            'no': 'Was that a yes?' # we ask for yes instead of no as the goal is to get their desired intent as input. if they didn't say yes they said no instead
+        }
     
+    def get_sentiment(self):
+        # get sentiment of user input (positive/negative)
+            # adjust chatbot mood accordingly
+                    # from nltk.sentiment.vader import SentimentIntensityAnalyzer
+        pass
+
     def gap_filling(self, keyword:str, user_input:str):
         # if keyword found in input return true
             # combine with three tiered ig
             # warning
             # 
         pass
-    
+
     def write_file(self):
         # write to file
         # save file
         pass
+    
+    def intent_transaction(self, intent:str):
+        # if successful transaction, append to transaction list (don't append to transaction list in three tiered confidence, that only tracks that it is a transaction(?))
+        # if(is_transaction):
+            # self.transaction_list.append()
+        
+        # how do we handle undoing ---------------------------------------------------
+            # undo, redo : "did you change your mind"
+                # two stacks
+                    # one for completed actions
+                    # one for undone actions
+                
+            # only append yes and no for transactions
+                # transaction flag
+        
+        if(intent == 'transaction'): # 
+            intent = input("Did you want to do business?")
+
+        match intent:
+            case 'buy': # need spellcheck for this + gap filling?, cosine sim?
+                # , print current listings in iterable display
+                    # search AGAIN LMAO
+                        # actually display all the matching listings in some interactive way
+                pass
+            case 'sell': # listings
+                pass
+            case 'bounty':
+                pass
+            case 'bid':
+                pass
+            case 'steal': # random chance, gl
+                pass
+            case 'secret': # nothing spicy, don't be weird
+                pass
+            case _: # return intent and pause input for iteration 
+                pass
+
+        # ask if they want to continue WE BALL, WE ARE ALWAYS IN THE AUCTION HOUSE NOW
+            # if so-
+            # in retrospect, it's m
 
     def unexpected_intent(self, expected_intents:list[str]):
         while True:
             match input("Wasn't expecting that, you want to do something else?\nYou: "):
                 case yes:
                     pass
-    
+
+    def three_tier_input(self, prompt:str):
+        i, s = self.get_new_intent(str) # if score greater than 1, skip three tiered
+        intent = self.three_tiered_confidence(i, s, False)
+        
+        return intent
+
+    def three_tiered_confidence(self, intent:str, score:float, is_transaction:bool):
+        
+        if(score < 0.7): # explicit reprompt
+            sleep(1)
+            return ''
+        elif(score < 0.9): # partial reprompt, matching new intent to help recover
+            new_input = input(self.partial_prompts[intent]+"\nYou: ")
+            new_intent, new_score = new_input, 0.8 #self.intent_matcher.search_intent(new_input)
+            
+            new_intent, new_score = self.get_new_intent(self.partial_prompts[intent])
+            
+            # import random
+            # rand = random.randint(0,1)
+            # if (rand):
+            #     new_score = 1
+            #     print("score is 1")
+            
+            # recursive call to three tiered as we need to verify their confirmation
+                # in edge case of their confidence being uncertain (0.7-0.9)
+                    # repeat until we get a confirmed intent, then return to original
+                        
+                        
+                        # if intent is something else, 
+            new_intent = self.three_tiered_confidence(new_intent, new_score, is_transaction=False) # this is here to get 
+            match new_intent: # if intent is yes keep original intent
+                case 'yes':
+                    pass
+                case 'no': # if intent is no return blank intent (back to outer loop)
+                    return '' # we don't return a new intent if they say no
+                case _:
+                    # print("default case")
+                    return new_intent
+        
+
+        if(is_transaction): # append transaction to this list, recording successful transaction, return intent (could be buy or sell) to original transaction so that can be appended to transaction list
+            self.intent_list.append('transaction')
+        else:
+            if intent not in ["yes", "no"]: self.intent_list.append(intent) # don't append yes and no since there's no branching to be done off an intent of 'yes'
+
+        return intent # third 'invisible' tier using implicit confirmation
+
+
     def intent_settings(self):
-        i = input(f"We did this one already {self.nick}, are you sure you want to proceed?\nText goes here:")
         # if response not in expected labels
         # match input, but constrain it to yes and no
-        match i: # can't do match_yes_no method as it would be recursive and passed labels would need to change
+        match self.three_tier_input(f"We did this one already {self.nickname}, are you sure you want to proceed?"): 
+            # make it a while true method and call it back to back based on matched output?
             case 'yes':
-                j = input("In that case, I won't ask you next time, is that ok?")
-                match j:
+                match self.three_tier_input("In that case, I won't ask you next time, is that ok?"):
                     case 'yes':
+                        print('Gotcha.') # list of acknowledgements based on attitude
+                    case 'no':
                         print('Gotcha.')
+            case 'no':
+                pass
+            case _:
+                return   
 
-    def get_prev_intent(self, curr_intent:str):
+    def get_prev_intent(self):
         # Backwards step until we find a key within our defined methods
             # queue
                 # we need a base case (within our desired keys)
@@ -83,34 +193,80 @@ class Intent:
                         # if successful transactions > 3 then valued customer etc
                 # discoverability, exit, help, 
                     # literally no reason       
-        prev_intent = self.intent_list[len(self.intent_list) - 1]
-        if(prev_intent == curr_intent):# this should be handled based on intent e.g. if a specific transaction is triggered multiple times. this is the nature of some actions, no?
+        
+        prev_intent = self.intent_list[len(self.intent_list) - 2] # -2 as by this method the current intent is the last in array (the current intent calls the prev intent method)
+        
+        # list of potential conflicts that lead to other functions
+        if(prev_intent == inspect.stack()[1].function.split('_')[1]):# this should be handled based on intent e.g. if a specific transaction is triggered multiple times. this is the nature of some actions, no?
+            print(inspect.stack()[1].function.split('_')[1])
             self.intent_settings()
 
-        return 
+        return prev_intent # return prev if no conflict
+
+    def get_new_intent(self, prompt:str): # wrapper to make getting new intent more traceable
+        new_intent, new_score = input(prompt+"\nYou:"), 1 # testing purposes --------------
+        # new_intent, new_score = self.intent_matcher.search_intent(input(prompt+"\nYou:"))
         
+        return new_intent, new_score
+    
     def intent_exit(self):
-        # match case based on the previous method -------------------------------------------------
-            # hence having generic case
-        # UNDER NO CIRCUMSTANCE CAN WE CALL ANOTHER METHOD ----------------------------------------
-        
-        self.get_prev_intent()
-        # perform appropriate function
-        # match state
+        # use f string to format response based on chatbot mood ---------------------------
             # state = 'angry'
                 # rude exit response | consider: auto exit before (like ragequitting)
-
-        print("Goodbye!")
-        sys.exit()
         
+        # prompt user (possibly)
+        match self.get_prev_intent():
+            case 'discoverability':
+                # print("After all the options, well see you...")
+                pass
+            case 'question-answering':
+                # it was nice/miserable answering your question
+                pass
+            case 'name-calling':
+                # mention name in response from storage
+                pass
+            case 'exit':
+                # print("Awkward silence")
+                pass
+            case _: # cases: 'question-greeting'
+                # print("Goodbye!")
+                pass
+        
+        # perform function
+        sys.exit()
     def intent_help(self):
         # match case based on previous method -----------------------------------------------------
+            # make help context-based how?
+                # previous method doesn't specify that's what they need help with
+                    # especially since all states point to each other 
+                        # make it based on calling function
+                            #  if we match help as a new intent within a function
+                                # e.g. transactions
 
+        
+        # perform function
         print("Help is on the way!")
 
+        # prompt user (possibly)
+        match self.get_prev_intent():
+            case 'discoverability':
+                # 
+                pass
+            case 'question-answering':
+                # 
+                pass
+            case 'name-calling':
+                # 
+                pass
+            case '':
+                # 
+                pass
+            case _: # cases: 'question-greeting'
+                # print("Goodbye!")
+                pass
     def intent_greeting(self):
         name=''
-        # match case based on previous method -----------------------------------------------------
+        # match case based on previous method ---------------------------------------------
             # check user/chatbot states as well
             # do stuff based on whether we know them, and reputation from csv 
         if(name): 
@@ -119,93 +275,35 @@ class Intent:
             name = input("Hello, what is your name? ")
             print(f"Nice to meet you {name}")
 
+        # possibly ask if they have anything they want to do, in a conversational way
+            # then return their intent
+                # use bool to not flag input in outer loop --------------------------------
+                    # acting like a directed graph
     def intent_name_calling(self):
-        # match case based on previous method -----------------------------------------------------
+        # match case based on previous method ---------------------------------------------
         # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name
         name='' # placeholder, get name from csv, ---------------------------------------------- 
         if(name): # need to handle intent matching, if name exists in csv -------------------------
             print(f"Hello {name}") # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name
         else:
             print("You haven't told me your name yet...")
-
     def intent_question_greeting(self):
-        # match case based on previous method -----------------------------------------------------
+        # match case based on previous method ---------------------------------------------
         ip = input("I am fine, how are you? ")
         match ip: # Possibly do some sentiment analysis ------------
             case '':
                 print("Not one for small talk I see")
-            case _:
+            case _: # use gap filling / sentiment analysis to expand ----------------------
                 print("That's nice, or maybe it isn't...")
-
     def intent_discoverability(self):
         # match case based on previous method -----------------------------------------------------
             # specify auction functions when prev is to do with auction, and so on for any nested ones
         print("I can meet all the criteria for the checkpoint and more:)")
-
     def intent_qa(self, question:str):
         # match case based on previous method -----------------------------------------------------
         answers = self.search_qa.search_qa(query=question)
         
         if(answers):
             for ans in answers:
-                print(ans)   
-
-    def prompt_intent(self, intent:str): 
-        """Call the prompt() function of the provided intent key, changing the current intent"""
-        
-        self.intents[intent].prompt()
-
-    
-class help_inten(Intent): # example subclass of intent
-    def __init__(self):
-        # super().__init__()
-        pass
-
-    def prompt(self): # Get calling(?) intent to make help context-based
-        # each other intent would be hardcoded, they're all simple anyway
-            # make this the default case where all generic functions are 
-        # transaction
-            # default
-                # welcome to the auction house...
-            # buy
-                # you can buy stuff
-            # etc
-        print("Help is on the way! (adding help command closer to completion)")
-
-        # then match new intent
-            # directed graph 
-            # restrict intents in some way in some cases????
-        
-        # self.intents(self.get_new_intent()).prompt()
-        self.prompt_intent(intent="greeting")
-        
-
-class transaction(Intent):
-    def __init__(self):
-        pass
-    def prompt(self):
-        pass
-
-class States:
-    def __init__(self):
-        self.users = [] # list of registered users
-        
-        # list of states (neutral, )
-            # what are states limited to?
-            # why call them states and not moods or something
-                # sentiments (sentiment analysis)
-                    # from nltk.sentiment.vader import SentimentIntensityAnalyzer
-        self.states = ['happy', 'sad'] # list of states ()
-
-        self.user_states = {
-            'happy': 0.1,
-            'sad': 0.0
-
-        } # dict of user and their current state, export possibly to keep track ----------------------------------------------
-        
-        self.chatbot_states = {
-
-        } # limited size list of chatbot states, multi-state interaction | do we keep it consistent or based on user, consistent is cool because of npc -------------------------
-        pass
-
+                print(ans)      
     
