@@ -1,0 +1,94 @@
+{
+  "users": [
+    {
+      "name": "hank",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "jake",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "jane",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "jill",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "h",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "q",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "hh",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "qwe",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "qwee",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    },
+    {
+      "name": "qweq",
+      "status": "neutral",
+      "chatbot-mood": {
+        "happy": 0.0,
+        "sad": 0.0,
+        "angry": 0.0
+      }
+    }
+  ]
+}
