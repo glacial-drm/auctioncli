@@ -19,7 +19,6 @@ def main():
     
     
     if f.new_user: e.intent_tutorial()
-    h.event_sell()
 
     while True:
         h.print_events() # show user their events if any

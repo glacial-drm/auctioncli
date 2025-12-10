@@ -31,30 +31,6 @@
       "seller": "qwe",
       "buyer": "qwe",
       "risk": 5
-    },
-    "Dinor": {
-      "price": 29,
-      "count": 81,
-      "bidding": 1,
-      "seller": "oracle",
-      "buyer": "",
-      "risk": 1
-    },
-    "lecit": {
-      "price": 36,
-      "count": 4,
-      "bidding": 1,
-      "seller": "oracle",
-      "buyer": "",
-      "risk": 1
-    },
-    "elect": {
-      "price": 81,
-      "count": 7,
-      "bidding": 0,
-      "seller": "oracle",
-      "buyer": "",
-      "risk": 1
     }
   }
 }
