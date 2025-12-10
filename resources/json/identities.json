@@ -1,94 +1,44 @@
 {
-  "users": [
-    {
-      "name": "hank",
+  "users": {
+    "hank": {
+      "nickname": "champ",
       "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
     },
-    {
-      "name": "jake",
+    "qwe": {
+      "nickname": "nick",
       "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
+      "balance": 1351.0,
+      "bounty": 11,
+      "system-mood": 0.5,
+      "events": []
     },
-    {
-      "name": "jane",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
+    "ad": {
+      "nickname": "champ",
+      "status": "criminal",
+      "balance": 1000,
+      "bounty": 1,
+      "system-mood": 0.5,
+      "events": []
     },
-    {
-      "name": "jill",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
+    "eme": {
+      "nickname": "champ",
+      "status": "criminal",
+      "balance": 1990.0,
+      "bounty": 2.5,
+      "system-mood": 0.5,
+      "events": []
     },
-    {
-      "name": "h",
+    "steal": {
+      "nickname": "champ",
       "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
-    },
-    {
-      "name": "q",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
-    },
-    {
-      "name": "hh",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
-    },
-    {
-      "name": "qwe",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
-    },
-    {
-      "name": "qwee",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
-    },
-    {
-      "name": "qweq",
-      "status": "neutral",
-      "chatbot-mood": {
-        "happy": 0.0,
-        "sad": 0.0,
-        "angry": 0.0
-      }
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
     }
-  ]
+  }
 }

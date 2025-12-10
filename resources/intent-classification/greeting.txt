@@ -31,3 +31,4 @@
 "heyo"
 "wazoo"
 "wazzup"
+"greeting"

@@ -1,5 +1,60 @@
 {
-    "items": [
-        
-    ]
+  "items": {
+    "item1": {
+      "price": 10,
+      "count": 10,
+      "bidding": true,
+      "seller": "qwe",
+      "buyer": "",
+      "risk": 1
+    },
+    "item2": {
+      "price": 110,
+      "count": 10.0,
+      "bidding": false,
+      "seller": "qwe",
+      "buyer": "youuuu",
+      "risk": 5
+    },
+    "ppap": {
+      "price": 100,
+      "count": 10,
+      "bidding": true,
+      "seller": "qwe",
+      "buyer": "",
+      "risk": 5
+    },
+    "pspap": {
+      "price": 2.0,
+      "count": 10,
+      "bidding": true,
+      "seller": "qwe",
+      "buyer": "qwe",
+      "risk": 5
+    },
+    "Dinor": {
+      "price": 29,
+      "count": 81,
+      "bidding": 1,
+      "seller": "oracle",
+      "buyer": "",
+      "risk": 1
+    },
+    "lecit": {
+      "price": 36,
+      "count": 4,
+      "bidding": 1,
+      "seller": "oracle",
+      "buyer": "",
+      "risk": 1
+    },
+    "elect": {
+      "price": 81,
+      "count": 7,
+      "bidding": 0,
+      "seller": "oracle",
+      "buyer": "",
+      "risk": 1
+    }
+  }
 }

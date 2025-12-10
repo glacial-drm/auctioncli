@@ -39,3 +39,4 @@
 "How was your day, dearie"
 "How were you up to today"
 "how are you"
+"question-greeting"

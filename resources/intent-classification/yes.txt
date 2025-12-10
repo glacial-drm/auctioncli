@@ -549,5 +549,6 @@
 "who hasn't"
 "you bet"
 "i would  love that"
-"please don't stop"
-"don't stop"
+"ok"
+"okay"
+"o.k."

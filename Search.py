@@ -13,7 +13,7 @@ from scipy import spatial
 from os import walk
 
 
-class Similarity:
+class Similarity: # rename other classes in a similar way, similarity correspons to search here -------------------------------
 
     def __init__(self):
         self.__inverted_index = {}
@@ -170,15 +170,11 @@ class Similarity:
     def process_text(self, document): # Text splitting into list of words, then preprocessing and returning list
         tokens = nltk.word_tokenize(document)
         tokens = [token.lower() for token in tokens]
-        # Stemming and lemmatisation?
-        # Drop question marks???
+        # Stemming and lemmatisation? -------------------------------------------------------------
+        # Drop question marks??? ------------------------------------------------------------------
         return tokens
 
-class Transaction():
-    pass
-    # difference is checking for [intent] as a keyword in text? 
-
-class TXT_Intent():
+class TXT_Intent(Similarity):
     def __init__(self, folder_path):
         super().__init__()
         

@@ -39,3 +39,4 @@
 "tell me what you can do"
 "what you can do"
 "what you can do"
+"discoverability"
