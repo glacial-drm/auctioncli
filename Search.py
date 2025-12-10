@@ -23,7 +23,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
         self.__doc_total = 0
     
     def search_cosines(self, query:str, sort_desc:bool): # returns cosine similarities of a query against the calling Similarity object's corpus
-        
+        '''Returns the cosine similarities of a query agains the calling Similarity object's corpus'''
         query_dict = {
             'query': query
         }
@@ -42,7 +42,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
         return query_cosines    
 
     def cosine_similarities(self, query_inverted_index: dict): # cosine similarity on query with whole document, returns array
-        
+        '''Computes the cosine similarity of a query on a corpus'''
 
         # Cosine Similarity # NEED TO ACCOUNT FOR ORDERING
             
@@ -74,7 +74,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
         return cosine_similarities
 
     def TF_IDF_weighting(self, inverted_index: dict, is_corpus: bool):
-        
+        '''Applies TF-IDF weighting to the corpus, or optionally a query'''
         if(is_corpus):
             inverted_index = self.__inverted_index
         
@@ -97,7 +97,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
             return inverted_index
         
     def to_inverted_index(self, dictionary: dict, sparse:bool, is_corpus:bool):
-        
+        '''Converts a document-term matrix to a term-document matrix'''
         processed_dictionary = {}
         for doc in dictionary: # for document (key) in dictionary
             processed_dictionary[doc] = self.process_text(dictionary[doc]) # preprocessing
@@ -138,7 +138,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
         self.__inverted_index = inverted_index
 
     def compute_corpus_shape(self, dictionary: dict): # dictionary here is a non inverted index, such as CSV_QA.questions
-        
+        '''Computes term and and document totals of a standard dictionary'''
         terms = []
         self.__term_total = 0
         self.__doc_total = 0
@@ -157,7 +157,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
                 terms.append(term)
                 
     def compute_term_counts(self): # Compute word counts of a term-document matrix, return term-count dictionary
-        
+        '''Computes term counts of the stored inverted index for calculations, such as TF-IDF weighting'''
         counts = defaultdict(int)
 
         for docs in self.__inverted_index.items():
@@ -168,6 +168,7 @@ class Similarity: # rename other classes in a similar way, similarity correspons
         self.__term_counts = counts
 
     def process_text(self, document): # Text splitting into list of words, then preprocessing and returning list
+        '''Preprocesses text data to standardise it for usage'''
         tokens = nltk.word_tokenize(document)
         tokens = [token.lower() for token in tokens]
         # Stemming and lemmatisation? -------------------------------------------------------------
@@ -196,6 +197,7 @@ class TXT_Intent(Similarity):
         
 
     def search_intent(self, query:str):
+        '''Used to search for the best intent match for a query'''
         # constrain based on passed labels -------------------------
             # always include universal ones, simple
             # , intent_labels:list[str]
@@ -216,10 +218,10 @@ class TXT_Intent(Similarity):
                         # then question answering will return nothing found if not relevant
             
             sorted_similarities = obj.search_cosines(query=query, sort_desc=True)
-            x = next(iter(sorted_similarities))
+            x = next(iter(sorted_similarities)) # get greatest intent
             
             intent_scores[intent] = sorted_similarities[x]
-            print(intent, sorted_similarities[x])
+            # print(intent, sorted_similarities[x])
         
         best_intent = next(iter(dict(sorted(intent_scores.items(), key=lambda item:item[1], reverse=True))))
         
@@ -227,6 +229,7 @@ class TXT_Intent(Similarity):
         return (best_intent, intent_scores[best_intent])
 
     def folder_to_dicts_intent(self, folder_path):
+        '''Converts a set of intent folders containing txts to a set of dictionaries containing intent files'''
         filenames = next(walk(folder_path), (None, None, []))[2]  # [] if no file | https://tinyurl.com/45cwzxw8
         
         for file in filenames:
@@ -256,7 +259,8 @@ class CSV_QA(Similarity):
         self.compute_term_counts() # Compute term and dictionary counts for TF_IDF weighting
         self.TF_IDF_weighting(inverted_index={}, is_corpus=True) # Weight the corpus
     
-    def search_qa(self, query:str): #-----------------------------------------------------------------------
+    def search_qa(self, query:str):
+        '''Searches for the best matching answer for an input question'''
         sorted_similarities = self.search_cosines(query=query, sort_desc=True)
         
         # Return similarities
@@ -276,7 +280,7 @@ class CSV_QA(Similarity):
         return query_answers
 
     def csv_to_dict_qa(self): # Get questions and answers from document (given there are "Question" and "Answer" headings in csv)
-        
+        '''Converts a csv containing Question and Answer columns to dictionaries'''
         questions = {}
         answers = {}
         with open (self.__path, 'r', encoding ='utf -8 ') as f:

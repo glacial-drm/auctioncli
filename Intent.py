@@ -1,36 +1,23 @@
-import inspect, sys # orgranise imports ----------------------------------------------------------
+import inspect, sys
 from time import sleep
 
 from nltk.corpus import words, wordnet as wn
 from nltk.util import ngrams
 from nltk.metrics.distance import jaccard_distance
 
+from joblib import load
+
 from Search import TXT_Intent, CSV_QA
-from Identity import Identity
-from Transaction import Transaction
+from Identity import IdentityManager
+from Transaction import TransactionManger
 
 
 
-class Intent:
-    # lessons learnt
-        # can't define classes/methods in terms of each other because recursion
-            # hence each reference has to be independent and cannot point to another reference
-                # unless that reference doesn't point to another reference
-        # don't overcomplicate
-            # goal was originally to create architecture similar to a directed graph
-            # we can imply this using match case and checking previous intent
-            # we can also constrain the response by passing labels to the search item
-    # new goal
-        # use 'inspect.stack()[2].code_context' to track the previously called method, acting as a graph without the necessary infrastructure
-        # restrict the scope of methods that call other methods
-            # this is only necessary for methods that have sub-calls
-                # transaction
-
-            
-    def __init__(self, intent_matcher:TXT_Intent, qa_searcher:CSV_QA, identity:Identity, transaction: Transaction):
+class IntentManager:
+    def __init__(self, intent_matcher:TXT_Intent, qa_searcher:CSV_QA, identity:IdentityManager, transaction: TransactionManger):
         # Constructor Parameters
-        self.intent_matcher = intent_matcher
-        self.qa_searcher = qa_searcher
+        self.intentMatcher = intent_matcher
+        self.qaSearcher = qa_searcher
         self.users = identity
         self.items = transaction
 
@@ -38,13 +25,12 @@ class Intent:
 
         # Base case for intent tracking needed as prev intent is len(intent_history) - 2
             # this is as current intent, method calling get_prev_intent is appended to end of list
-        self.intent_history = ['start']
+        self.intentHistory = ['start']
 
         self.intents = ['exit', 'help', 'greeting', 'name-calling', 'question-greeting', 'discoverability', 'question-answering', 'freeze', 'unfreeze']
-        self.transaction_intents = ['buy', 'sell', 'bounty', 'bid', 'transaction', 'search', 'steal'] #'purchase' used to be in here but that doesn't map
+        self.transactionIntents = ['buy', 'sell', 'bounty', 'bid', 'transaction', 'search', 'steal'] #'purchase' used to be in here but that doesn't map
 
-        self.partial_prompts = { # include a recoverable yes/no (N-best-lists for intents with multiple branches)
-            # constrained responses --------------------------------------------------------------
+        self.partialPrompts = {
             'exit': 'Did you want to exit?',
             'help': 'Everything ok? Do you need some help?',
             'greeting': '',
@@ -56,7 +42,7 @@ class Intent:
             'yes': 'Was that a yes?',
             'no': 'Was that a yes?' # we ask for yes instead of no as the goal is to get their desired intent as input. if they didn't say yes they said no instead
         }
-        self.repeat_prompts = { 
+        self.repeatPrompts = { 
             # only for (most) transactions
                 # small talk intents (above) are easily repeatable.
                 # (most) transactions have depth, making it annoying to have to re-type
@@ -68,41 +54,68 @@ class Intent:
             'search': 'search for'
         }
 
-        self.intent_frozen = {
+        self.intentFrozen = {
             'state': False,
             'intent': '' 
         }
 
-        self.duplicate_notice = True
-        self.other_notices = True
-        # split other_notices into the following
-            # Yes
-                # repeat notices
-            # Maybe (these improve performance, do we keep that or allow the user to do whatever)
-                # three_tier_input notices(?) 
-                # synonym_resolution notices(?)
+        self.duplicateNotice = True
+        self.otherNotices = True
 
-        # Identity
-            # user stats --------------------------------------------------------------------------
-        self.greeting = "What's up"
-        self.intent_count = {}
+    def split_output(self, str1:str, str2:str):
+        '''This method allows for differing output prompts based on the system's perception of the user'''
+        if self.users.jsonUsers[self.users.currentUser]['system-mood'] > 0.5:
+            self.staggered_output(str1)
+        else:
+            self.staggered_output(str2)
 
-        # Events
-        # load-file
-            # FILE SHOULD BE JSON -----------------------------------------------------------------
-        self.transaction_list = [('yes', 'buy')] # need an actual base case -----------------------
-        # this stuff should go in states
-            # list of acknowledgements based on attitude
-
-
-    def get_sentiment(self):
+    def split_input(self, str1:str, str2:str):
+        '''This method allows for differing input prompts based on the system's perception of the user'''
+        if self.users.jsonUsers[self.users.currentUser]['system-mood'] > 0.5:
+            input(str1)
+        else:
+            input(str2)
+    def disambiguation(self, user_input:str):
+        '''This method prevents and as a keyword, disambiguating instances of too much information'''
+        if user_input == None or user_input == "":
+            return user_input
+        
+        x = user_input
+        if 'and' in user_input:
+            print(user_input.split("and",1))
+            x = input("Could you specify the more important query please?:\nYou: ")
+        
+        return x    
+    def sentiment_mood(self, user_input:str):
+        '''This method uses sentiment analysis to punish or benefit the user based on their input'''
         # get sentiment of user input (positive/negative)
-            # adjust chatbot mood accordingly
-                    # from nltk.sentiment.vader import SentimentIntensityAnalyzer
-        # import all data first
-        pass
+            # adjust system mood accordingly
 
+        if user_input == None or user_input == "":
+            return
+
+        
+        vect = load('./resources/models/vectorizer.joblib')
+        transf = load('./resources/models/transformer.joblib')
+        clf = load('./resources/models/classifier.joblib')
+
+        processed_newdata = vect.transform([user_input])
+        processed_newdata = transf.transform(processed_newdata)
+
+
+        curr_user_system_mood =  self.users.jsonUsers[self.users.currentUser]['system-mood']
+        match clf.predict(processed_newdata)[0]:
+            case 'positive':
+                
+                if curr_user_system_mood < 1:
+                    self.users.jsonUsers[self.users.currentUser]['system-mood'] += 0.1
+            case 'negative':
+                if curr_user_system_mood > 0:
+                    self.users.jsonUsers[self.users.currentUser]['system-mood'] -= 0.1
+        
+        self.users.write_json()
     def spellcheck(self, _input:str):
+        '''This method uses nltk.wordnet to check the spelling of user input'''
         list_words = _input.split(' ')
         list_correct_words = []
         correct_words = words.words()
@@ -130,9 +143,9 @@ class Intent:
                         case 'yes':
                             return _input
                         case 'no':
-                            return self.spellcheck(input("What did you mean to say?\nYou: "))
-            
+                            return self.spellcheck(input("What did you mean to say?\nYou: "))            
     def synonym_resolution(self, keyword:str, user_input:str): # previously referred to as gap filling
+        '''This method generates synonyms and derivative formms, attempting to intent-match the user's input using them'''
         # if keyword synonym found in input return keyword
             # get synonyms and match
                 # synonym resolution (homonym resolution is disambiguation)
@@ -168,21 +181,21 @@ class Intent:
         # print(synonyms)
 
     def append_intent(self, intent:str):
+        '''This is a wrapper method to make intent appends to history more traceable'''
         # This method filters out wildcard intents and yes/no
             # wildcard intents don't exist to the system, we use cosine sim / synonym resolution to map to a given intent
             # don't append yes and no since there's no branching to be done off an intent of 'yes'
 
-        if intent in self.intents or intent in self.transaction_intents: 
+        if intent in self.intents or intent in self.transactionIntents: 
             # print("appending: "+intent)
             print(inspect.stack()[1].function)
-            self.intent_history.append(intent)
-
+            self.intentHistory.append(intent)
     def repeat_intent(self, repeating_intent:str): # may need is_transaction if we do undo/redo
-        
+        '''This enables the user to repeat the previous intent'''
         self.users.write_json()
         self.items.write_json()
 
-        intent = self.three_tiered_input(f"Do you want to {self.repeat_prompts[repeating_intent]} another item?")
+        intent = self.three_tiered_input(f"Do you want to {self.repeatPrompts[repeating_intent]} another item?")
         
         match intent:
             case 'yes':
@@ -193,9 +206,8 @@ class Intent:
             case 'no':
                 self.unfreeze_intent()
             case _:
-                if intent in self.intents or self.transaction_intents:
+                if intent in self.intents or self.transactionIntents:
                     self.freeze_intent(intent=intent, append=False)
-
     def freeze_intent(self, intent:str, append:bool): # if we want to force a new intent we need to store the intent here
         '''This method freezes the intent of the next iteration if one is passed in the current iteration
         This mimics the function of an interconnected graph, with most nodes having connecting edges'''
@@ -203,8 +215,8 @@ class Intent:
             # defining methods in terms of each other may lead to recursive definitions which can very easily get out of control when adding scope to project
             # hence refer to a method using the intent key for the method in the outer loop
                 # scalable and already part of the infrastructure
-        self.intent_frozen['state'] = True
-        self.intent_frozen['intent'] = intent
+        self.intentFrozen['state'] = True
+        self.intentFrozen['intent'] = intent
 
         # Not all match case statements append the intent of the user to history when matching
             # Why?
@@ -221,30 +233,33 @@ class Intent:
             # this is possible as we have already determined the intent
         self.append_intent('freeze') 
     def unfreeze_intent(self):
-        self.intent_frozen['state'] = False
-        self.intent_frozen['intent'] = ''
+        '''This method unfreezes the current intent'''
+        self.intentFrozen['state'] = False
+        self.intentFrozen['intent'] = ''
     
     def three_tiered_input(self, prompt:str):
+        '''This method combines three-tiered confidence with user input as a wrapper method'''
         # Called each iteration in loop
         i, s = self.get_new_intent(prompt) # if score greater than 1, skip three tiered
         intent = self.three_tiered_confidence(i, s, False)
-        # synonym resolution to return transaction intents ----------------------------------------
+        
         return intent
     def get_new_intent(self, prompt:str): # wrapper to make getting new intent more traceabl
-        new_intent, new_score = input(prompt+"\nYou: "), 1 # testing purposes --------------
-        # new_intent, new_score = self.intent_matcher.search_intent(input(prompt+"\nYou:"))
+        '''This method is a wrapper for using the Intent Match object to get a new user input Intent'''
+        # new_intent, new_score = input(prompt+"\nYou: "), 1 # testing purposes --------------
+        new_intent, new_score = self.intentMatcher.search_intent(input(prompt+"\nYou:"))
         
         return new_intent, new_score
     def three_tiered_confidence(self, intent:str, score:float, is_transaction:bool):
-        
+        '''This method uses multiple different confirmation techniques based on the cosine similarity output the user prompt'''
         if(score < 0.7): # explicit reprompt
             sleep(1)
             return ''
         elif(score < 0.9): # partial reprompt, matching new intent to help recover
-            new_input = input(self.partial_prompts[intent]+"\nYou: ")
-            new_intent, new_score = new_input, 1 #self.intent_matcher.search_intent(new_input)
+            #new_input = input(self.partialPrompts[intent]+"\nYou: ")
+            # new_intent, new_score = new_input, 1 #self.intentMatcher.search_intent(new_input)
             
-            # new_intent, new_score = self.get_new_intent(self.partial_prompts[intent])
+            new_intent, new_score = self.get_new_intent(self.partialPrompts[intent])
             # import random
             # rand = random.randint(0,1)
             # if (rand):
@@ -277,67 +292,60 @@ class Intent:
 
 
     def intent_settings(self):
-        if self.duplicate_notice:
-            intent = self.three_tiered_input(f"We did this one already {self.users.current_user}, are you sure you want to proceed?")
+        '''This method allows for some notices to be disabled'''
+        if self.duplicateNotice:
+            intent = self.three_tiered_input(f"We did this one already {self.users.currentUser}, are you sure you want to proceed?")
             match intent:
                 case 'yes':
                     match self.three_tiered_input("In that case, I won't ask you next time, is that ok?"):
                         case 'yes':
                             print('Gotcha.') # list of acknowledgements based on attitude
-                            self.duplicate_notice = False
+                            self.duplicateNotice = False
                         case 'no':
                             print('Gotcha.')
                         case _:
-                            if intent in self.intents or intent in self.transaction_intents:
+                            if intent in self.intents or intent in self.transactionIntents:
                                 self.freeze_intent(intent, append=False) 
                             
                             return # return called here as there are other match-cases that can potentially mess with freezing
                 case 'no':
                     pass
                 case _:
-                    if intent in self.intents or intent in self.transaction_intents:
+                    if intent in self.intents or intent in self.transactionIntents:
                         self.freeze_intent(intent, append=False) 
                     
                     return # same as above default case
 
-        if self.other_notices:
+        if self.otherNotices:
             intent_2 = self.three_tiered_input(f"Do you want notices to remain on?")
             match intent_2:
                 case 'yes':
                     pass
                 case 'no':
-                    self.other_notices= False
+                    self.otherNotices= False
                 case _:
-                    if intent in self.intents or intent in self.transaction_intents:
+                    if intent in self.intents or intent in self.transactionIntents:
                         self.freeze_intent(intent, append=False) 
 
     def staggered_output(self, output:str):
-        # Normalise output in some way (put pipe character in same position) ----------------------
-            # can't pass in entire and loop based on number of characters
-                # that requires inserting dashes if words are cut
-                    # doable but effort for now
+        '''This method forces the user to press enter to continue'''
         print(output+" | (Enter)") # remove enter if notices turned off --------------------------
-        # animate text to look like typing -------------------------------------------------------
+        
         while True:
-            # animate the dots --------------------------------------------------------------------
-                # requires use of keyboard module instead of input which pauses loop
-            # print(".")
-            # sleep(1)
-            
             if input("") == "":
                 break
-        # option to skip entirely....  ------------------------------------------------------------
     
-    def get_prev_intent(self): # functions no longer always call this, so have to rework into an iteration-ly check. this should help duplicate check to work ------------------------------
+    def get_prev_intent(self):
+        '''This method returns the calling method from stack memory'''
+        
         # for things that check total number of interactions (based on current user)
-            # store in file each call, prevents the need to 
-        # we would rather keep track of user stats to determine output
+        # we would ideally rather keep track of user stats to determine output
             # if successful transactions > 3 then valued customer etc     
-        print(self.intent_history)
-        prev_intent = self.intent_history[len(self.intent_history) - 2] # -2 as by this method the current intent is the last in array (the current intent calls the prev intent method)
+        # print(self.intentHistory)
+        prev_intent = self.intentHistory[len(self.intentHistory) - 2] # -2 as by this method the current intent is the last in array (the current intent calls the prev intent method)
 
         
-        print("awoo: "+inspect.stack()[1].function) # get calling function 
+        # print("awoo: "+inspect.stack()[1].function) # get calling function 
         curr_intent = inspect.stack()[1].function.split('_')[1] # calling functions can only be in format 'intent_x' (hence the '_' delimiter)
         if(prev_intent == curr_intent):# this should be handled based on intent e.g. if a specific transaction is triggered multiple times. this is the nature of some actions, no?
             # print("AGAIN: "+curr_intent)
@@ -346,24 +354,26 @@ class Intent:
 
         if prev_intent == 'freeze': # we don't want to return frozen as an intent | we may want to now
             pass
-            # prev_intent = self.intent_history[len(self.intent_history) - 3] 
+            # prev_intent = self.intentHistory[len(self.intentHistory) - 3] 
         
 
         return prev_intent # return prev if no conflict
 
 
     def intent_tutorial(self):
-        if self.users.new_user:
+        '''This is the dialog tree for the tutorial'''
+        if self.users.newUser:
             self.append_intent('tutorial')
             match self.three_tiered_input("You seem new. Want me to show you the ropes?"):
                 case 'yes':
                     self.intent_help()
                     # self.freeze_intent(intent='tutorial', append=True)  # this maps to the help method, combining any help text as a tutorial
-                    # self.intent_history.append('unfreeze') # unfreeze so 
+                    # self.intentHistory.append('unfreeze') # unfreeze so 
                 case 'no':
                     pass
 
     def intent_exit(self):
+        '''This is the dialog tree for the exit intent'''
         # use f string to format response based on chatbot mood ---------------------------
             # state = 'angry'
                 # rude exit response | consider: auto exit before (like ragequitting)
@@ -376,7 +386,7 @@ class Intent:
                 # print(f"It was {nice/miserable} answering your question, goodbye")
                 pass
             case 'name-calling' | 'greeting':
-                # print(f"{Pleasure/disdainful} doing business with you {nickname/self.users.current_user}.")
+                # print(f"{Pleasure/disdainful} doing business with you {nickname/self.users.currentUser}.")
                     # switch between nickname/name based on greatest chatbot mood
                 pass
             case _: # known cases: 'question-greeting' |
@@ -387,11 +397,11 @@ class Intent:
         sys.exit()
     
     def intent_help(self):
+        '''This is the dialog tree for the help method'''
         # if current user is a criminal then we deny help --------------------------------------
             # return      
         
-        # also maybe get definition (using wordnet (wn)) ------------------------
-        intent = self.three_tiered_input("Welcome to the Help Desk\nWhat would you like to learn more about?\n"+str(self.intents)+"\n"+str(self.transaction_intents))
+        intent = self.three_tiered_input("Welcome to the Help Desk\nWhat would you like to learn more about?\n"+str(self.intents)+"\n"+str(self.transactionIntents))
         match intent: # three tier input needs synonym_resolution in some way to match intents
             case 'discoverability':
                 self.staggered_output("Discoverability allows you to get all the deets about the Auction House straight. Make sure to go there if you want an overall summary!")
@@ -415,7 +425,7 @@ class Intent:
                     # case 0:
                         # self.staggered_output("You're currently broke, so try selling some items or look at the bounty to gain intel about current criminals")
                     # case _:
-                        # self.staggered_output(f"Your current balance is {self.users.current_user}")
+                        # self.staggered_output(f"Your current balance is {self.users.currentUser}")
                 self.staggered_output("You can access the buying menu by requesting to buy at the front desk!")
             case 'sell':
                 self.staggered_output("Selling allows you to list an item of your choice on the marketplace...")
@@ -453,14 +463,15 @@ class Intent:
         
         # question answering does not map to outputting an answer here
             # limit using notices ----------------------------------------
-        if not self.duplicate_notice:
+        if not self.duplicateNotice:
             self.staggered_output("Try asking a question sometime, you never know what might happen!")
 
         # repeat intent
             # keep or change the match text
 
     def intent_greeting(self):
-        name = self.users.current_user
+        '''This is the dialog tree for the greeting intent'''
+        name = self.users.currentUser
         
         # check user/chatbot states as well ------------------------------------------------------
             # do stuff based on whether we know them, and reputation from json
@@ -474,7 +485,7 @@ class Intent:
         # match case based on previous method ---------------------------------------------
         # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name   
 
-        name = self.users.current_user
+        name = self.users.currentUser
         self.staggered_output(f"Hello {name}...")
         intent = self.three_tiered_input(f".....are you {name}?")
         match intent:
@@ -485,27 +496,29 @@ class Intent:
                 # verify changing active user works ----------------------------------------------------------------
                 return
             case _:
-                if intent in self.transaction_intents or intent in self.intents:
+                if intent in self.transactionIntents or intent in self.intents:
                     self.freeze_intent(intent, False) 
                     return
         
         
         # change nickname --------------------------------------
         self.staggered_output(f"How about your nickname...")
-        intent_2 = self.three_tiered_input(f".....do you like being called {self.users.json_users[name]['nickname']}?")
+        intent_2 = self.three_tiered_input(f".....do you like being called {self.users.jsonUsers[name]['nickname']}?")
         match intent_2:
             case 'yes':
                 self.staggered_output("OK...")
                 self.staggered_output("run along now...")
             case 'no':
-                self.users.json_users[name]['nickname'] = input("What is your nickname? Un-nicknamed one..\nYou: ")
+                self.users.jsonUsers[name]['nickname'] = input("What is your nickname? Un-nicknamed one..\nYou: ")
                 self.users.write_json() # THIS REALLY SHOULDN'T BE HERE BUT THIS METHOD IS ONLY USED HERE SO IT'S FINE FOR NOW
             case _:
-                if intent in self.transaction_intents or intent in self.intents:
+                if intent in self.transactionIntents or intent in self.intents:
                     self.freeze_intent(intent, False) 
 
             
     def intent_question_greeting(self):
+        '''This is the dialog tree for the question-greeting intent, such as how are you?'''
+        
         # match case based on previous method ---------------------------------------------
         intent = input("I am fine, how are you? ")
         match intent: # Possibly do some sentiment analysis ------------------------------------------
@@ -516,10 +529,12 @@ class Intent:
             case 'negative':
                 print("That's not nice, or maybe it is...")
             case _: # wildcard freeze (maybe not because sentiment analysis)
-                if intent in self.transaction_intents or intent in self.intents:
+                if intent in self.transactionIntents or intent in self.intents:
                     self.freeze_intent(intent, True)
                 
     def intent_discoverability(self): # conversational markers -----
+        '''This is the dialog tree for the discoverability intent'''
+
         self.staggered_output("Welcome to the Auction House Discoverability Summary...")
         self.staggered_output("The House is split into two main sections...")
         self.staggered_output("The Front desk and the Transaction desk...")
@@ -530,8 +545,8 @@ class Intent:
         self.staggered_output("If you need help with something specific, don't hesitate to say so at the front desk!")
 
     def intent_qa(self, question:str):
-        # match case based on previous method -----------------------------------------------------
-        answers = self.qa_searcher.search_qa(query=question)
+        '''This is the where question answering is handled, returning an appropriate answer'''
+        answers = self.qaSearcher.search_qa(query=question)
         
         if(answers):
             for ans in answers:
@@ -540,20 +555,21 @@ class Intent:
             print("Your question doesn't have an answer")
     
     def intent_transaction(self, intent:str):
+        '''This is where the transaction intents are routed. Each is directed to a different method'''
         # how do we handle undoing ----------------------------------------------------------------
             # undo, redo : "did you change your mind"
                 # two stacks
                     # one for completed actions
                     # one for undone actions
                 # this only applies to transaction methods
-                    # search using x in self.transaction_intents
+                    # search using x in self.transactionIntents
 
         # if user.status != criminal and user.transaction_total > num (transaction total) ---------
             # welcome valued customer
         # and the opposite
 
         if(intent == 'transaction' or intent == 'auction'): # 
-            intent = input("What business did you want to do today?\nYou:")
+            intent = input("What business did you want to do today?\nYou: ")
 
         match intent:
             case 'buy': # need spellcheck for this
@@ -570,9 +586,9 @@ class Intent:
 
                 match self.three_tiered_input((f"Should {partial_item['title']} be put up for auction?:")):
                     case 'yes':
-                        self.items.create_item(self.users.current_user, partial_item['title'], partial_item['price'], partial_item['count'], bidding=True)
+                        self.items.create_item(self.users.currentUser, partial_item['title'], partial_item['price'], partial_item['count'], bidding=True)
                     case 'no':
-                        self.items.create_item(self.users.current_user, partial_item['title'], partial_item['price'], partial_item['count'], bidding=False)
+                        self.items.create_item(self.users.currentUser, partial_item['title'], partial_item['price'], partial_item['count'], bidding=False)
             case 'bid':
                 self.items.bid()
                 self.repeat_intent(intent)

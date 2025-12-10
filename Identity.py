@@ -1,36 +1,46 @@
 import json, sys
 from time import sleep
 
-class Identity:
+class IdentityManager:
     def __init__(self, path:str, user:str):
         self.path = path
 
         self.json = {}
-        with open(self.path, encoding ='utf8 ', errors ='ignore ', mode ='r') as json_file:
-            self.json = json.load(json_file)#['users']#[0]
-        self.json_users = self.json['users']
+        self.jsonUsers = {}
 
-        self.user_names = [x for x in self.json["users"].keys()] # list of registered users from json
-        print(self.user_names)
-        self.current_user = ''
-        self.new_user = not self.check_user_exists(user)
+        self.userNames = [] # list of registered users from json
+        self.read_json()
+        
+        self.newUser = not self.check_user_exists(user)
 
+        self.currentUser = ''
         self.load_user(user)
-        if self.check_exile(self.current_user):
+        if self.check_exile(self.currentUser):
             print("Do not come back")
             sys.exit()
+        
         # self.user_statuses = ['criminal', 'neutral', 'law-abiding']
-        # self.chatbot_moods = ['happy', 'sad', 'angry']
+
+    def read_json(self):
+        '''Reads the JSON file responsible for storage'''
+        with open(self.path, encoding ='utf8 ', errors ='ignore ', mode ='r') as json_file:
+            self.json = json.load(json_file)#['users']#[0]
+        self.jsonUsers = self.json['users']
+
+        self.userNames = [x for x in self.json["users"].keys()]
 
     def write_json(self):
+        '''Updates the Identity JSON file in storage.'''
         with open(self.path, encoding ='utf8 ', errors ='ignore ', mode ='w') as json_file:
             json.dump(self.json, json_file, indent=2)
-        # no need to load json after as self.json is equal to file contents
+
+        self.read_json()
 
     def print_users(self, names:list[str]):
+        '''Displays users and their bounties'''
         spacing = ' '*4
         print(f"Name:{spacing}Bounty:{spacing}")
-        for key, values in self.json_users.items():
+        for key, values in self.jsonUsers.items():
             if key in names:
                 print('{name:<{name_width}}{spacing}{bounty:>{bounty_width}}{spacing}'.format( # this formatting should be used to limit input ---------------
                     spacing = spacing,
@@ -39,52 +49,54 @@ class Identity:
                     ))
 
     def create_user(self, name:str):
+        '''Creates a user entry in memory using a 'name' key. Fails if key already exists'''
         if self.check_user_exists(name):
             return False # unsuccessful
 
-        self.user_names.append(name)
+        self.userNames.append(name)
         user = {
             'nickname': 'champ', # allow changing of nickname -------------------------------------
             'status': 'neutral', # exile, criminal, neutral, law-abiding
             'balance': 1000,
             'bounty': 0,
-            'system-mood': 0.5, # changed to 0 to 1 range
+            'system-mood': 0.5, # 0 to 1 range (0 bad)
             'events': []
-            # could technically double store data by directly storing listings --------------------
-                # currently only function that needs user items is change_listing
-                    # if enough time then yea sure change it
             # inventory:
         }
         
         # append to json
-        self.json_users[name] = user
+        self.jsonUsers[name] = user
         self.write_json()
         
         return True # successful
 
     def load_user(self, user:str):
-        
+        '''Replaces the current user with a newly specified user'''
         if not self.check_user_exists(user):
             self.create_user(name=user)  
         
-        self.current_user = user
+        self.currentUser = user
 
     def check_user_exists(self, user:str):
-        if user in self.user_names:
+        '''Determines if a user key exists in JSON storage'''
+        if user in self.userNames:
             return True
         return False
 
     def change_current_user_status(self, status:str):
-        self.json_users[self.current_user]['status'] = status
+        '''Changes the status of the current user to a specified status'''
+        self.jsonUsers[self.currentUser]['status'] = status
         self.write_json()
     
     def check_exile(self, user_title:str):
-        if self.json_users[user_title]['status'] == 'exile':
+        '''Determines if the user has the exile status'''
+        if self.jsonUsers[user_title]['status'] == 'exile':
             return True
         return False
     
-    def exile_user(self): # user is blocked on entry
-        if self.json_users[self.current_user]['system-mood'] == 0:
+    def exile_user_check(self): # user is blocked on entry
+        '''Handles the case if a user has been exiled. They are not allowed entry.'''
+        if self.jsonUsers[self.currentUser]['system-mood'] == 0:
             print("About time you saw the consequences of your actions")
             print("The Auction House always wins")
             print("Do not come back")
@@ -99,7 +111,7 @@ class Identity:
         if not positive :
             change = -0.1
         
-        current_mood = self.json_users[self.current_user]['system-mood'][mood]
+        current_mood = self.jsonUsers[self.currentUser]['system-mood'][mood]
         current_mood += change
         
         if current_mood < 0: current_mood = 0
@@ -108,14 +120,14 @@ class Identity:
         self.write_json()
 
     def get_greatest_chatbot_mood(self):
-        chatbot_moods = self.json_users[self.current_user]['system-mood']
+        chatbot_moods = self.jsonUsers[self.currentUser]['system-mood']
         return max(chatbot_moods, chatbot_moods.get)
 
     def get_average_chatbot_mood(self):
         mood_total = 0.0
         num_moods = 0.0
 
-        for value in self.json_users[self.current_user]['system-mood'].values():
+        for value in self.jsonUsers[self.currentUser]['system-mood'].values():
             mood_total += value
             num_moods += 1
 
@@ -123,7 +135,7 @@ class Identity:
     
     def get_chatbot_mood(self, mood:str):
         
-        if mood in self.chatbot_moods:
-            return self.json_users[self.current_user]['system-mood'][mood]
+        if mood in self.chatbotMoods:
+            return self.jsonUsers[self.currentUser]['system-mood'][mood]
         
         return ''

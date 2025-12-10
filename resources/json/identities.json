@@ -11,9 +11,9 @@
     "qwe": {
       "nickname": "nick",
       "status": "neutral",
-      "balance": 1351.0,
+      "balance": 3531.0,
       "bounty": 11,
-      "system-mood": 0.5,
+      "system-mood": 1.0999999999999999,
       "events": []
     },
     "ad": {
@@ -33,6 +33,30 @@
       "events": []
     },
     "steal": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "QWE": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "dummy_name": {
       "nickname": "champ",
       "status": "neutral",
       "balance": 1000,

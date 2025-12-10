@@ -2,15 +2,15 @@ import random
 
 from nltk.corpus import words, wordnet as wn
 
-from Identity import Identity
-from Transaction import Transaction
+from Identity import IdentityManager
+from Transaction import TransactionManger
 
 
 
-class Event: # manages events that can occur in the auction house
+class EventManager: # manages events that can occur in the auction house
     # create event object in main, run it n times an iteration
         # don't make it annoying to the user
-    def __init__(self, users:Identity, items:Transaction):
+    def __init__(self, users:IdentityManager, items:TransactionManger):
         # load stat from user
         # load json for shop / bounties
 
@@ -20,13 +20,14 @@ class Event: # manages events that can occur in the auction house
     
 
     def print_events(self):
+        '''Prints the strings listed in the current user's event list from JSON'''
         # when a user logs in, update them of anything related to them
             # read their events and empty them
             # needs to be staggered and limited so user isn't overwhelmed --------------------
                 # pass intent and use staggered output
                 # staggered output in main file
         current_user_events: list[str]
-        current_user_events = self.users.json_users[self.users.current_user]['events']
+        current_user_events = self.users.jsonUsers[self.users.currentUser]['events']
         
         if current_user_events != []:
             for x in current_user_events:
@@ -36,11 +37,8 @@ class Event: # manages events that can occur in the auction house
                 current_user_events.remove(x)
         pass
 
-    def queue_event(self): # used to determine which event is picked
-        # layers of rng
-            # random method
-                # random success
-                    # random item within method
+    def queue_event(self):
+        '''Selects a random event'''
 
         x = random.randint(1,5)
 
@@ -50,34 +48,36 @@ class Event: # manages events that can occur in the auction house
             self.event_sell()
 
 
-        # take string returned from event method and add to user's events
-
-    
     def event_buy(self):
+        '''Simulates a buy transaction, using the 'oracle' entity'''
         # buy from a user current user, decrementing count of thing
             # if user is current user, notify them on next iteration
-        if self.items.items_titles == []:
+        if self.items.itemsTitles == []:
             return
+
+        buy_title = random.choice(self.items.itemsTitles)
         
-        buy_title = random.choice(self.items.items_titles)
-        buy_item = self.items.json_items[buy_title]
-        buy_seller = self.items.json_items[buy_title]['seller']
+        if self.items.jsonItems[buy_title]['seller'] == 'oracle':
+            return
+
+        buy_item = self.items.jsonItems[buy_title]
+        buy_seller = self.items.jsonItems[buy_title]['seller']
         
         
         # buy random count of item
         buy_count = random.randint(1, buy_item['count'])
-        buy_price = self.items.json_items[buy_title]['price']
+        buy_price = self.items.jsonItems[buy_title]['price']
         buy_price_total = buy_count * buy_price
 
         # pay money to user
-        current_seller = self.items.json_items[buy_title]['seller']
-        self.users.json_users[current_seller]['balance'] += buy_price_total
+        current_seller = self.items.jsonItems[buy_title]['seller']
+        self.users.jsonUsers[current_seller]['balance'] += buy_price_total
         
         # buy item
-        self.items.json_items[buy_title]['count'] -= buy_count
+        self.items.jsonItems[buy_title]['count'] -= buy_count
         
         # remove item if no more remain
-        if self.items.json_items[buy_title]['count']  == 0: buy_item = self.items.remove_item(buy_title)        
+        if self.items.jsonItems[buy_title]['count']  == 0: buy_item = self.items.remove_item(buy_title)        
 
         # format string
         buy_prompt = f"oracle has bought {buy_count} {buy_title}(s) for {buy_price_total}"
@@ -85,6 +85,7 @@ class Event: # manages events that can occur in the auction house
         print("bought")
 
     def event_sell(self):
+        '''Simulates a sell transaction, using the 'oracle' entity'''
         # create new listing for the user to buy
             # random item name (from where)
                 # two random words from wordnet        
