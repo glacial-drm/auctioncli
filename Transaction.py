@@ -136,7 +136,7 @@ class TransactionManger:
             # match item in self.items
                 # if not in items match three tiered input using their input
             # self.jsonItems[item]['buyer'] = self.users.currentUser
-        buy_title = input("Which item would you like to buy?: ")        
+        buy_title = input("First, which item would you like to buy?: ")        
         if not self.check_item_exists(buy_title):
             print(f"No match found for {buy_title}")
             return
@@ -147,7 +147,7 @@ class TransactionManger:
                 # or an inventory system
 
         # how many of item would you like to buy --------------------------------------------------
-        buy_count = self.constrain_num_input(f"How many of {buy_title} would you like to buy?: ", [1, self.jsonItems[buy_title]['count']], int_float=0)
+        buy_count = self.constrain_num_input(f"Next, how many of {buy_title} would you like to buy?: ", [1, self.jsonItems[buy_title]['count']], int_float=0)
         if buy_count == 0: return
         elif buy_count > self.jsonItems[buy_title]['count']:
             print(f"There is not enough stock for {buy_count} of {buy_item}")
@@ -226,12 +226,12 @@ class TransactionManger:
 
         self.print_items(titles=bid_item_titles)
         
-        bid_title = input("Which item would you like to bid on?: ")        
+        bid_title = input("First, which item would you like to bid on?: ")        
         if not self.check_item_exists(bid_title) or bid_title not in bid_item_titles:
             print(f"No match found for {bid_title}")
             return
 
-        bid_amount = self.constrain_num_input(f"How much do you want to bid (1-100) £{self.jsonItems[bid_title]['price']}+", range=(1,100), int_float=False)
+        bid_amount = self.constrain_num_input(f"Next, how much do you want to bid (1-100) £{self.jsonItems[bid_title]['price']}+", range=(1,100), int_float=False)
         if not bid_amount: 
             print("Bid Failed...")
             return
@@ -290,7 +290,7 @@ class TransactionManger:
         self.print_items(self.itemsTitles)
 
         # ask user if they want to steal item
-        steal_title = input("Which item do you want to steal?\nYou: ")
+        steal_title = input("Which item do you want to steal?\nYou:  ")
         if steal_title not in self.itemsTitles:
             print("That is not an item")
             return

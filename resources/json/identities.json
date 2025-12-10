@@ -9,11 +9,11 @@
       "events": []
     },
     "qwe": {
-      "nickname": "nick",
+      "nickname": "boi",
       "status": "neutral",
-      "balance": 3531.0,
+      "balance": 3430.0,
       "bounty": 11,
-      "system-mood": 1.0999999999999999,
+      "system-mood": 0.9999999999999999,
       "events": []
     },
     "ad": {
@@ -35,9 +35,9 @@
     "steal": {
       "nickname": "champ",
       "status": "neutral",
-      "balance": 1000,
+      "balance": 970.0,
       "bounty": 0,
-      "system-mood": 0.5,
+      "system-mood": 0.0,
       "events": []
     },
     "": {
@@ -50,10 +50,10 @@
     },
     "QWE": {
       "nickname": "champ",
-      "status": "neutral",
+      "status": "exile",
       "balance": 1000,
       "bounty": 0,
-      "system-mood": 0.5,
+      "system-mood": 0.0,
       "events": []
     },
     "dummy_name": {
@@ -62,6 +62,94 @@
       "balance": 1000,
       "bounty": 0,
       "system-mood": 0.5,
+      "events": []
+    },
+    "dave": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "lol": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.4,
+      "events": []
+    },
+    "exit": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    " QWE": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "gh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "yh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.4,
+      "events": []
+    },
+    "jasdhh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "qqwe": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "qwhehw": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "logg": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "what d": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 901.0,
+      "bounty": 0,
+      "system-mood": 0.6,
       "events": []
     }
   }

@@ -5,7 +5,7 @@ import warnings
 def main():
 
     warnings.filterwarnings('ignore')  # some warnings were caused by single token input, program still runs good though.
-    nltk.download(all) # hoping this is already done in the assessment
+    nltk.download('all') # hoping this is already done in the assessment
 
     QA = Search.CSV_QA(path='./resources/model_data/COMP3074-CW1-Dataset_500.csv')
     intentMatch = Search.TXT_Intent(folder_path='./resources/model_data/intent-classification')
@@ -39,9 +39,9 @@ def main():
         if(intentManager.intentFrozen['state']):
             if intentManager.intentFrozen['intent'] in intentManager.transactionIntents:
                 # print(sub_intent)
-                user_input = 'transaction'
+                intent = 'transaction'
             else:
-                user_input = intentManager.intentFrozen['intent']
+                intent = intentManager.intentFrozen['intent']
         else:
             user_input = intentManager.spellcheck(input("Please enter your prompt: ")) 
             

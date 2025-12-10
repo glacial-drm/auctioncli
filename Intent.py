@@ -72,9 +72,9 @@ class IntentManager:
     def split_input(self, str1:str, str2:str):
         '''This method allows for differing input prompts based on the system's perception of the user'''
         if self.users.jsonUsers[self.users.currentUser]['system-mood'] > 0.5:
-            input(str1)
+            input(str1+"\nYou:  ")
         else:
-            input(str2)
+            input(str2+"\nYou:  ")
     def disambiguation(self, user_input:str):
         '''This method prevents and as a keyword, disambiguating instances of too much information'''
         if user_input == None or user_input == "":
@@ -83,7 +83,7 @@ class IntentManager:
         x = user_input
         if 'and' in user_input:
             print(user_input.split("and",1))
-            x = input("Could you specify the more important query please?:\nYou: ")
+            x = input("Could you specify the more important query please?:\nYou:  ")
         
         return x    
     def sentiment_mood(self, user_input:str):
@@ -143,7 +143,32 @@ class IntentManager:
                         case 'yes':
                             return _input
                         case 'no':
-                            return self.spellcheck(input("What did you mean to say?\nYou: "))            
+                            return self.spellcheck(input("What did you mean to say?\nYou:  "))      
+                        case _:
+                            if intent in self.intents or self.transactionIntents:
+                                self.freeze_intent(intent=intent_2, append=False)
+                case _:
+                    if intent in self.intents or self.transactionIntents:
+                        self.freeze_intent(intent=intent, append=False)
+    
+    def synres_three_tier(self, prompt:str):
+        '''Method that uses the pattern in main to combine both intent matching methods'''
+        x = self.three_tiered_input(prompt)
+        
+        if x != "":
+            
+            return x
+        
+        for keyword in self.transactionIntents: # three tiered is more specific to small talk | synoynm resolution allows for transaction intents to be matched with nltk data
+            sub_intent = self.synonym_resolution(keyword, prompt)
+            if keyword != sub_intent: continue
+            if sub_intent != None: # if synonym resolution matches, force the transaction intent
+                print(sub_intent)
+                return sub_intent
+        
+        return prompt
+                    
+
     def synonym_resolution(self, keyword:str, user_input:str): # previously referred to as gap filling
         '''This method generates synonyms and derivative formms, attempting to intent-match the user's input using them'''
         # if keyword synonym found in input return keyword
@@ -175,7 +200,7 @@ class IntentManager:
                     continue
 
                 if synonym in user_input:
-                    print(synonym)
+                    # print(synonym)
                     return keyword
         
         # print(synonyms)
@@ -188,7 +213,7 @@ class IntentManager:
 
         if intent in self.intents or intent in self.transactionIntents: 
             # print("appending: "+intent)
-            print(inspect.stack()[1].function)
+            # print(inspect.stack()[1].function)
             self.intentHistory.append(intent)
     def repeat_intent(self, repeating_intent:str): # may need is_transaction if we do undo/redo
         '''This enables the user to repeat the previous intent'''
@@ -240,14 +265,18 @@ class IntentManager:
     def three_tiered_input(self, prompt:str):
         '''This method combines three-tiered confidence with user input as a wrapper method'''
         # Called each iteration in loop
+        # for intent in self.transactionIntents:
+        #     if intent in prompt:
+        #         return intent
+        
         i, s = self.get_new_intent(prompt) # if score greater than 1, skip three tiered
         intent = self.three_tiered_confidence(i, s, False)
         
         return intent
     def get_new_intent(self, prompt:str): # wrapper to make getting new intent more traceabl
         '''This method is a wrapper for using the Intent Match object to get a new user input Intent'''
-        # new_intent, new_score = input(prompt+"\nYou: "), 1 # testing purposes --------------
-        new_intent, new_score = self.intentMatcher.search_intent(input(prompt+"\nYou:"))
+        # new_intent, new_score = input(prompt+"\nYou:  "), 1 # testing purposes --------------
+        new_intent, new_score = self.intentMatcher.search_intent(input(prompt+"\nYou: "))
         
         return new_intent, new_score
     def three_tiered_confidence(self, intent:str, score:float, is_transaction:bool):
@@ -256,9 +285,8 @@ class IntentManager:
             sleep(1)
             return ''
         elif(score < 0.9): # partial reprompt, matching new intent to help recover
-            #new_input = input(self.partialPrompts[intent]+"\nYou: ")
+            #new_input = input(self.partialPrompts[intent]+"\nYou:  ")
             # new_intent, new_score = new_input, 1 #self.intentMatcher.search_intent(new_input)
-            
             new_intent, new_score = self.get_new_intent(self.partialPrompts[intent])
             # import random
             # rand = random.randint(0,1)
@@ -329,7 +357,7 @@ class IntentManager:
 
     def staggered_output(self, output:str):
         '''This method forces the user to press enter to continue'''
-        print(output+" | (Enter)") # remove enter if notices turned off --------------------------
+        print(output+" | (Enter)") 
         
         while True:
             if input("") == "":
@@ -374,9 +402,6 @@ class IntentManager:
 
     def intent_exit(self):
         '''This is the dialog tree for the exit intent'''
-        # use f string to format response based on chatbot mood ---------------------------
-            # state = 'angry'
-                # rude exit response | consider: auto exit before (like ragequitting)
         
         # prompt user (possibly)
         match self.get_prev_intent():
@@ -401,13 +426,19 @@ class IntentManager:
         # if current user is a criminal then we deny help --------------------------------------
             # return      
         
+        # transaction intents fail to be fetched here, last day bug...
+            # issue is that three_tiered_input only predicts on small talk intents (excluding transactions)
+                # this was after reimplementing the intent classifier built earlier, which lacked data for transactionala intents
+                # definitely fixable, just lack the time, sorry :(
         intent = self.three_tiered_input("Welcome to the Help Desk\nWhat would you like to learn more about?\n"+str(self.intents)+"\n"+str(self.transactionIntents))
+        
+        # intent = self.synres_three_tier(prompt= "Welcome to the Help Desk\nWhat would you like to learn more about?\n"+str(self.intents)+"\n"+str(self.transactionIntents))
         match intent: # three tier input needs synonym_resolution in some way to match intents
             case 'discoverability':
                 self.staggered_output("Discoverability allows you to get all the deets about the Auction House straight. Make sure to go there if you want an overall summary!")
             case 'name-calling':
-                self.staggered_output("According to some people, going to the front desk can switch you into a different person...")
-                self.staggered_output("Crazy right?")
+                self.split_output("According to some people, going to the front desk can switch you into a different person...","I think you should go to the front desk, get a new name or something.")
+                self.split_output("Crazy right?","Yea, no point in still talking to you")
             case 'question-greeting' | 'greeting':
                 self.staggered_output("You can get to know the front desk this way, pretty neat huh?")
             case 'question-answering':
@@ -421,11 +452,6 @@ class IntentManager:
                 self.staggered_output("You're alread in the right place!")
             case 'buy':
                 self.staggered_output("Buying is the process of exchanging money for items listed in the auction house...")
-                # match current balance ---------------------------------------
-                    # case 0:
-                        # self.staggered_output("You're currently broke, so try selling some items or look at the bounty to gain intel about current criminals")
-                    # case _:
-                        # self.staggered_output(f"Your current balance is {self.users.currentUser}")
                 self.staggered_output("You can access the buying menu by requesting to buy at the front desk!")
             case 'sell':
                 self.staggered_output("Selling allows you to list an item of your choice on the marketplace...")
@@ -486,13 +512,13 @@ class IntentManager:
         # hello, what is your name? -> is name in list -> yes - hi name | no - hello new_name   
 
         name = self.users.currentUser
-        self.staggered_output(f"Hello {name}...")
+        self.split_output(f"Hello {name}...","...")
         intent = self.three_tiered_input(f".....are you {name}?")
         match intent:
             case 'yes':
                 self.staggered_output("Ok...")
             case 'no':
-                self.users.load_user(input("What is your name? New or old it matters not.\nYou: ")) # make \nYou: formatted input function, then use that and pass it into three tiered whenever needed
+                self.users.load_user(input("What is your name? New or old it matters not.\nYou:  ")) # make \nYou:  formatted input function, then use that and pass it into three tiered whenever needed
                 # verify changing active user works ----------------------------------------------------------------
                 return
             case _:
@@ -502,14 +528,15 @@ class IntentManager:
         
         
         # change nickname --------------------------------------
-        self.staggered_output(f"How about your nickname...")
-        intent_2 = self.three_tiered_input(f".....do you like being called {self.users.jsonUsers[name]['nickname']}?")
+        self.split_output(f"How about your nickname...","... and your nickname...")
+        intent_2 = self.split_input(f".....do you like being called {self.users.jsonUsers[name]['nickname']}?", f"...can you tolerate being called {self.users.jsonUsers[name]['nickname']}?")
+        
         match intent_2:
             case 'yes':
                 self.staggered_output("OK...")
                 self.staggered_output("run along now...")
             case 'no':
-                self.users.jsonUsers[name]['nickname'] = input("What is your nickname? Un-nicknamed one..\nYou: ")
+                self.users.jsonUsers[name]['nickname'] = input("What is your nickname? Un-nicknamed one..\nYou:  ")
                 self.users.write_json() # THIS REALLY SHOULDN'T BE HERE BUT THIS METHOD IS ONLY USED HERE SO IT'S FINE FOR NOW
             case _:
                 if intent in self.transactionIntents or intent in self.intents:
@@ -530,6 +557,7 @@ class IntentManager:
                 print("That's not nice, or maybe it is...")
             case _: # wildcard freeze (maybe not because sentiment analysis)
                 if intent in self.transactionIntents or intent in self.intents:
+                    print(intent)
                     self.freeze_intent(intent, True)
                 
     def intent_discoverability(self): # conversational markers -----
@@ -569,7 +597,7 @@ class IntentManager:
         # and the opposite
 
         if(intent == 'transaction' or intent == 'auction'): # 
-            intent = input("What business did you want to do today?\nYou: ")
+            intent = input("What business did you want to do today?\nYou:  ")
 
         match intent:
             case 'buy': # need spellcheck for this
