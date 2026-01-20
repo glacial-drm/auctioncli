@@ -1,0 +1,10 @@
+bid
+bet
+offer
+bidding
+betting
+offering
+tender
+submit
+put undo
+propose

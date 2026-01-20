@@ -1,0 +1,156 @@
+{
+  "users": {
+    "hank": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "qwe": {
+      "nickname": "boi",
+      "status": "neutral",
+      "balance": 3430.0,
+      "bounty": 11,
+      "system-mood": 0.9999999999999999,
+      "events": []
+    },
+    "ad": {
+      "nickname": "champ",
+      "status": "criminal",
+      "balance": 1000,
+      "bounty": 1,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "eme": {
+      "nickname": "champ",
+      "status": "criminal",
+      "balance": 1990.0,
+      "bounty": 2.5,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "steal": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 970.0,
+      "bounty": 0,
+      "system-mood": 0.0,
+      "events": []
+    },
+    "": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "QWE": {
+      "nickname": "champ",
+      "status": "exile",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.0,
+      "events": []
+    },
+    "dummy_name": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "dave": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "lol": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.4,
+      "events": []
+    },
+    "exit": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    " QWE": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "gh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "yh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.4,
+      "events": []
+    },
+    "jasdhh": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "qqwe": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "qwhehw": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.5,
+      "events": []
+    },
+    "logg": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 1000,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    },
+    "what d": {
+      "nickname": "champ",
+      "status": "neutral",
+      "balance": 901.0,
+      "bounty": 0,
+      "system-mood": 0.6,
+      "events": []
+    }
+  }
+}
